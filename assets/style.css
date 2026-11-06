@@ -58,9 +58,10 @@ ul.plain li{margin:0 0 6px}
 .s-bad{color:var(--bad);background:var(--bad-bg)} .s-none{color:var(--none);background:var(--none-bg)}
 td .status{margin-right:8px;vertical-align:1px}
 .head-row{display:flex;gap:10px;flex-wrap:wrap;margin:0 0 24px}
-dl.spec{display:grid;grid-template-columns:150px minmax(0,1fr);margin:0;border-top:1px solid var(--rule-soft)}
+dl.spec{display:grid;grid-template-columns:minmax(0,9rem) minmax(0,1fr);margin:0;border-top:1px solid var(--rule-soft)}
 dl.spec dt,dl.spec dd{padding:10px 0;border-bottom:1px solid var(--rule-soft);margin:0}
-dl.spec dt{font:500 12px/1.9 var(--mono);color:var(--muted)}
+dl.spec dt{font:600 13px/1.9 var(--sans);color:var(--muted);padding-right:12px}
+dl.spec dd{min-width:0}
 figure{margin:20px 0 22px}
 figure .plot{border-top:1px solid var(--rule);padding-top:12px}
 figure svg{max-width:100%;height:auto;display:block}
@@ -110,14 +111,14 @@ footer .top-in{padding:18px 32px 28px}
   .facts div:nth-child(n+3){border-top:1px solid var(--rule-soft)}
   dl.spec{grid-template-columns:1fr}
   dl.spec dt{border-bottom:0;padding-bottom:0}
-  table{width:100%;min-width:600px}
-  td{white-space:normal;min-width:112px}
+  .table-numeric table{min-width:36rem}
 }
 
 /* Paragraphs wrap naturally; only numeric results and formulas stay unbroken. */
 h1,h2,h3,.lede,.q{word-break:keep-all;overflow-wrap:break-word}
 h1{font-size:clamp(28px,2.6vw,38px);letter-spacing:-.035em;max-width:none}
-p,li,dd,td,figcaption{line-height:1.8;overflow-wrap:anywhere}
+p,li,dd,td,figcaption{line-height:1.8;word-break:keep-all;overflow-wrap:anywhere}
+p,dd,figcaption{text-wrap:pretty}
 .lede{max-width:42em;font-size:20px;line-height:1.8;color:var(--ink);margin-bottom:16px}
 .intro{max-width:46em;color:var(--muted);margin-bottom:32px}
 main>p,section>p{max-width:46em}
@@ -129,7 +130,7 @@ main>p,section>p{max-width:46em}
 .table-scroll{width:100%;overflow-x:auto;margin-bottom:18px;overscroll-behavior-x:contain}
 .table-scroll table{margin-bottom:0}
 .table-scroll:focus-visible{outline:2px solid var(--accent);outline-offset:4px}
-th,td{line-height:1.7;word-break:keep-all}
+th,td{line-height:1.7;word-break:keep-all;overflow-wrap:anywhere}
 th:first-child,td:first-child{min-width:48px}
 .math{white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.9}
 .status{font-family:var(--sans);line-height:1.35}
