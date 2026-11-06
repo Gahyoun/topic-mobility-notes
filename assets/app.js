@@ -73,7 +73,7 @@
         } catch (_) {}
       } catch (e) {
         err.textContent = "비밀번호가 맞지 않습니다.";
-        btn.disabled = false; btn.textContent = "Unlock"; input.select();
+        btn.disabled = false; btn.textContent = "열기"; input.select();
       }
     });
   }
