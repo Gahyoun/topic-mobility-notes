@@ -23,6 +23,9 @@
   async function open(key, blob) {
     const pt = await crypto.subtle.decrypt(
       { name: "AES-GCM", iv: b64(blob.iv), additionalData: enc.encode(blob.aad) }, key, b64(blob.ct));
+    if (blob.enc === "gzip") {
+      return new Response(new Blob([pt]).stream().pipeThrough(new DecompressionStream("gzip"))).json();
+    }
     return JSON.parse(new TextDecoder().decode(pt));
   }
 
