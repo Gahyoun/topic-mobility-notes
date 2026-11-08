@@ -943,6 +943,139 @@ button:focus-visible {
   outline-offset: 4px;
 }
 
+/* Preliminary analyses use the same blue wash as the trajectory explorer. */
+.preliminary {
+  --analysis-wash: #dcebf9;
+  --analysis-fade: #f1f7fd;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .preliminary {
+    --analysis-wash: #203c59;
+    --analysis-fade: #1a2737;
+  }
+}
+
+.preliminary .analysis-heading {
+  margin-bottom: 28px;
+  padding: clamp(16px, 2.6vw, 26px);
+  background: linear-gradient(112deg, var(--analysis-wash), var(--analysis-fade) 70%, var(--bg));
+}
+
+.preliminary .kicker {
+  display: block;
+  margin-bottom: 8px;
+}
+
+.preliminary .kicker,
+.preliminary .status,
+.preliminary h2.sec .n {
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+
+.preliminary h1 {
+  max-width: none;
+  margin-bottom: 8px;
+}
+
+.preliminary .head-row {
+  margin: 0;
+}
+
+.preliminary section {
+  margin-bottom: 34px;
+}
+
+.preliminary h2.sec {
+  border-top: 1px solid var(--rule);
+  padding-top: 14px;
+  margin-bottom: 12px;
+}
+
+.preliminary h2.sec .n {
+  min-width: 2ch;
+  text-align: left;
+}
+
+.preliminary .q,
+.preliminary .note,
+.preliminary ul.plain,
+.preliminary figcaption {
+  max-width: none;
+}
+
+.preliminary p {
+  text-wrap: wrap;
+}
+
+.preliminary figure,
+.preliminary .math.block,
+.preliminary .pager a {
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+}
+
+.preliminary figure {
+  padding: 0;
+  box-shadow: none;
+}
+
+.preliminary figcaption {
+  margin-top: 8px;
+  padding-top: 6px;
+}
+
+.preliminary .math.block {
+  padding-block: 10px;
+}
+
+.preliminary .note {
+  background: transparent;
+  border-left-width: 2px;
+  border-radius: 0;
+  padding: 0 0 0 12px;
+}
+
+.preliminary dl.spec dt {
+  background: transparent;
+  border-right: 0;
+}
+
+.preliminary dl.spec dd {
+  padding-inline: 8px 0;
+}
+
+.preliminary .table-scroll {
+  border-block: 1px solid var(--rule);
+}
+
+.preliminary th {
+  background: var(--analysis-fade);
+}
+
+.preliminary .pager {
+  margin-top: 36px;
+}
+
+.preliminary .pager a {
+  padding: 6px 0;
+  color: var(--accent);
+}
+
+.preliminary .pager a:hover {
+  text-decoration: underline;
+}
+
+@media (max-width: 900px) {
+  .preliminary dl.spec dt,
+  .preliminary dl.spec dd {
+    padding-inline: 0;
+  }
+}
+
 /* Responsive Mobile & Tablet */
 @media (max-width: 900px) {
   .shell {
