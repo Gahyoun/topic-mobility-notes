@@ -6,6 +6,26 @@
   const b64 = (s) => Uint8Array.from(atob(s), (c) => c.charCodeAt(0));
   const enc = new TextEncoder();
   let site = null;
+  let storyOffset = null;
+  let storyFrameRequest = 0;
+  let pendingStoryAnchor = false;
+
+  function reportStoryScroll() {
+    if (storyOffset === null || storyFrameRequest) return;
+    storyFrameRequest = requestAnimationFrame(() => {
+      storyFrameRequest = 0;
+      const frame = document.getElementById("trajectory-example");
+      if (!frame || storyOffset === null) return;
+      frame.contentWindow.postMessage({
+        type: "topic-trajectory-scroll",
+        top: frame.getBoundingClientRect().top + storyOffset,
+        viewport: window.innerHeight,
+      }, "*"); // Sandboxed srcdoc has an opaque origin.
+    });
+  }
+
+  window.addEventListener("scroll", reportStoryScroll, {passive:true});
+  window.addEventListener("resize", reportStoryScroll);
 
   async function loadBlob() {
     const r = await fetch("data/site.json", { cache: "no-store" });
@@ -33,13 +53,15 @@
     if (!site) return;
     const slug = (location.hash.match(/^#\/([\w-]+)/) || [])[1] || "index";
     const p = site.pages[slug] || site.pages.index;
+    storyOffset = null;
     document.getElementById("app").innerHTML = p.html;
     document.title = p.title + " · Research notes";
     const cur = document.querySelector('nav.side a[aria-current="page"]');
     const nav = document.querySelector("nav.side");
     if (cur && nav && nav.scrollWidth > nav.clientWidth) nav.scrollLeft = cur.offsetLeft - 16;
     const example = location.hash === "#/framework/trajectory" && document.getElementById("trajectory-example");
-    if (example) example.scrollIntoView();
+    pendingStoryAnchor = Boolean(example);
+    if (example) example.scrollIntoView({behavior:"instant", block:"start"});
     else window.scrollTo(0, 0);
   }
 
@@ -49,6 +71,17 @@
     const height = event.data.height;
     if (frame?.contentWindow === event.source && Number.isInteger(height) && height >= 320 && height <= 4000) {
       frame.style.height = height + "px";
+      const offset = event.data.storyOffset;
+      if (Number.isInteger(offset) && offset >= 0 && offset < height) {
+        storyOffset = offset;
+        if (pendingStoryAnchor) {
+          pendingStoryAnchor = false;
+          requestAnimationFrame(() => {
+            if (frame.isConnected) frame.scrollIntoView({behavior:"instant", block:"start"});
+            reportStoryScroll();
+          });
+        } else reportStoryScroll();
+      }
     }
   });
 
