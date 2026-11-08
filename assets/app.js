@@ -38,8 +38,19 @@
     const cur = document.querySelector('nav.side a[aria-current="page"]');
     const nav = document.querySelector("nav.side");
     if (cur && nav && nav.scrollWidth > nav.clientWidth) nav.scrollLeft = cur.offsetLeft - 16;
-    window.scrollTo(0, 0);
+    const example = location.hash === "#/framework/trajectory" && document.getElementById("trajectory-example");
+    if (example) example.scrollIntoView();
+    else window.scrollTo(0, 0);
   }
+
+  window.addEventListener("message", (event) => {
+    if (event.origin !== "null" || event.data?.type !== "topic-trajectory-height") return;
+    const frame = document.querySelector(".trajectory-embed");
+    const height = event.data.height;
+    if (frame?.contentWindow === event.source && Number.isInteger(height) && height >= 320 && height <= 4000) {
+      frame.style.height = height + "px";
+    }
+  });
 
   async function unlockWith(key, blob) {
     site = await open(key, blob);

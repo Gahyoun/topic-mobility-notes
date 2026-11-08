@@ -329,11 +329,6 @@ section {
   margin: 0 0 48px;
 }
 
-section > p,
-main > p {
-  max-width: 46em;
-}
-
 section.wide {
   max-width: none;
 }
@@ -678,7 +673,7 @@ tr.link:hover td {
   background: var(--warn-bg);
 }
 
-/* Math Blocks */
+/* Display equations keep their TeX alignment and scroll independently if needed. */
 .math.block {
   display: block;
   background: var(--bg-soft);
@@ -690,8 +685,43 @@ tr.link:hover td {
   margin: 14px 0 18px;
 }
 
-.math math {
-  font-family: math;
+.math.block .katex-display {
+  width: max-content;
+  min-width: 100%;
+  margin: 0;
+}
+
+.katex {
+  font-size: 1.08em;
+}
+
+.table-hypotheses table {
+  min-width: 38rem;
+}
+
+.table-hypotheses th:nth-child(2),
+.table-hypotheses td:nth-child(2) {
+  white-space: nowrap;
+}
+
+.trajectory-embed {
+  display: block;
+  width: 100%;
+  height: 1020px;
+  scroll-margin-top: 110px;
+  border: 1px solid var(--accent-border);
+  border-radius: 8px;
+  margin: 12px 0 24px;
+}
+
+@media (max-width: 650px) {
+  .math.block {
+    padding-inline: 12px;
+  }
+
+  .trajectory-embed {
+    height: 1510px;
+  }
 }
 
 /* Methodology Document (research-question.md) */
