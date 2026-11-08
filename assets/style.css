@@ -709,8 +709,7 @@ tr.link:hover td {
   width: 100%;
   height: 1020px;
   scroll-margin-top: 110px;
-  border: 1px solid var(--accent-border);
-  border-radius: 8px;
+  border: 0;
   margin: 12px 0 24px;
 }
 
@@ -727,6 +726,21 @@ tr.link:hover td {
 /* Methodology Document (research-question.md) */
 .methodology {
   min-width: 0;
+}
+
+.methodology ul,
+.methodology ol {
+  max-width: none;
+}
+
+.methodology p {
+  text-wrap: wrap;
+}
+
+.methodology .math.block {
+  background: transparent;
+  border: 0;
+  padding-block: 10px;
 }
 
 .methodology > p:first-child {
