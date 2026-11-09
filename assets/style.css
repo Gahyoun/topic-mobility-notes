@@ -770,6 +770,10 @@ tr.link:hover td {
   border-radius: 12px;
 }
 
+.methodology .method-result {
+  max-width: 100%;
+}
+
 .methodology h2 {
   font-size: 20px;
   line-height: 1.38;
