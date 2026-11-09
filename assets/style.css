@@ -281,35 +281,24 @@ h1 {
   text-wrap: pretty;
 }
 
-/* Research overview */
-main:has(> .facts) > .kicker {
-  background: transparent;
-  border: 0;
-  padding: 0;
-}
-
-.overview-note {
-  max-width: 55em;
-  margin: 20px 0 26px;
-}
-
-#career-cases + ol h3 small {
-  color: var(--muted);
-  font-size: .86em;
-  font-weight: 500;
-}
-
+/* Empirical Scope Facts Grid */
 .facts {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  column-gap: 18px;
-  border-block: 1px solid var(--rule);
-  margin: 0 0 24px;
+  background: var(--bg-soft);
+  border: 1px solid var(--rule);
+  border-radius: 8px;
+  margin: 0 0 36px;
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
 }
 
 .facts div {
-  min-width: 0;
-  padding-block: 15px;
+  padding: 18px 20px;
+}
+
+.facts div + div {
+  border-left: 1px solid var(--rule);
 }
 
 .facts dt {
@@ -338,6 +327,11 @@ main:has(> .facts) > .kicker {
 /* Sections & Headings */
 section {
   margin: 0 0 48px;
+}
+
+section > p,
+main > p {
+  max-width: 46em;
 }
 
 section.wide {
@@ -684,8 +678,9 @@ tr.link:hover td {
   background: var(--warn-bg);
 }
 
-/* Display equations keep their TeX alignment and scroll independently if needed. */
-.math.block {
+/* Math Blocks */
+.math.block,
+.methodology math[display="block"] {
   display: block;
   background: var(--bg-soft);
   border: 1px solid var(--rule-soft);
@@ -696,62 +691,13 @@ tr.link:hover td {
   margin: 14px 0 18px;
 }
 
-.math.block .katex-display {
-  width: max-content;
-  min-width: 100%;
-  margin: 0;
-}
-
-.katex {
-  font-size: 1.08em;
-}
-
-.table-hypotheses table {
-  min-width: 38rem;
-}
-
-.table-hypotheses th:nth-child(2),
-.table-hypotheses td:nth-child(2) {
-  white-space: nowrap;
-}
-
-.trajectory-embed {
-  display: block;
-  width: 100%;
-  height: 1020px;
-  scroll-margin-top: 110px;
-  border: 0;
-  margin: 12px 0 24px;
-}
-
-@media (max-width: 650px) {
-  .math.block {
-    padding-inline: 12px;
-  }
-
-  .trajectory-embed {
-    height: 1510px;
-  }
+.math math {
+  font-family: math;
 }
 
 /* Methodology Document (research-question.md) */
 .methodology {
   min-width: 0;
-}
-
-.methodology ul,
-.methodology ol {
-  max-width: none;
-}
-
-.methodology p {
-  text-wrap: wrap;
-}
-
-.methodology .math.block {
-  background: transparent;
-  border: 0;
-  padding-block: 10px;
 }
 
 .methodology > p:first-child {
@@ -760,18 +706,6 @@ tr.link:hover td {
   padding-bottom: 18px;
   margin-bottom: 28px;
   border-bottom: 1px solid var(--rule);
-}
-
-.methodology .method-example {
-  display: block;
-  width: 100%;
-  max-width: 640px;
-  height: auto;
-  border-radius: 12px;
-}
-
-.methodology .method-result {
-  max-width: 100%;
 }
 
 .methodology h2 {
@@ -958,139 +892,6 @@ button:focus-visible {
   outline-offset: 4px;
 }
 
-/* Preliminary analyses use the same blue wash as the trajectory explorer. */
-.preliminary {
-  --analysis-wash: #dcebf9;
-  --analysis-fade: #f1f7fd;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) .preliminary {
-    --analysis-wash: #203c59;
-    --analysis-fade: #1a2737;
-  }
-}
-
-.preliminary .analysis-heading {
-  margin-bottom: 28px;
-  padding: clamp(16px, 2.6vw, 26px);
-  background: linear-gradient(112deg, var(--analysis-wash), var(--analysis-fade) 70%, var(--bg));
-}
-
-.preliminary .kicker {
-  display: block;
-  margin-bottom: 8px;
-}
-
-.preliminary .kicker,
-.preliminary .status,
-.preliminary h2.sec .n {
-  padding: 0;
-  border: 0;
-  background: transparent;
-}
-
-.preliminary h1 {
-  max-width: none;
-  margin-bottom: 8px;
-}
-
-.preliminary .head-row {
-  margin: 0;
-}
-
-.preliminary section {
-  margin-bottom: 34px;
-}
-
-.preliminary h2.sec {
-  border-top: 1px solid var(--rule);
-  padding-top: 14px;
-  margin-bottom: 12px;
-}
-
-.preliminary h2.sec .n {
-  min-width: 2ch;
-  text-align: left;
-}
-
-.preliminary .q,
-.preliminary .note,
-.preliminary ul.plain,
-.preliminary figcaption {
-  max-width: none;
-}
-
-.preliminary p {
-  text-wrap: wrap;
-}
-
-.preliminary figure,
-.preliminary .math.block,
-.preliminary .pager a {
-  border: 0;
-  border-radius: 0;
-  background: transparent;
-}
-
-.preliminary figure {
-  padding: 0;
-  box-shadow: none;
-}
-
-.preliminary figcaption {
-  margin-top: 8px;
-  padding-top: 6px;
-}
-
-.preliminary .math.block {
-  padding-block: 10px;
-}
-
-.preliminary .note {
-  background: transparent;
-  border-left-width: 2px;
-  border-radius: 0;
-  padding: 0 0 0 12px;
-}
-
-.preliminary dl.spec dt {
-  background: transparent;
-  border-right: 0;
-}
-
-.preliminary dl.spec dd {
-  padding-inline: 8px 0;
-}
-
-.preliminary .table-scroll {
-  border-block: 1px solid var(--rule);
-}
-
-.preliminary th {
-  background: var(--analysis-fade);
-}
-
-.preliminary .pager {
-  margin-top: 36px;
-}
-
-.preliminary .pager a {
-  padding: 6px 0;
-  color: var(--accent);
-}
-
-.preliminary .pager a:hover {
-  text-decoration: underline;
-}
-
-@media (max-width: 900px) {
-  .preliminary dl.spec dt,
-  .preliminary dl.spec dd {
-    padding-inline: 0;
-  }
-}
-
 /* Responsive Mobile & Tablet */
 @media (max-width: 900px) {
   .shell {
@@ -1161,7 +962,11 @@ button:focus-visible {
   }
 
   .facts div {
-    padding-block: 12px;
+    padding: 14px 16px;
+  }
+
+  .facts div:nth-child(3) {
+    border-left: 0;
   }
 
   .facts div:nth-child(n + 3) {
