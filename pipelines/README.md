@@ -14,8 +14,9 @@ Publication cutoff is 2025-12-31. The source includes the analysis procedures. T
 | S22–S26 | Reproduce matched reference-geometry and time-window sensitivity analyses. |
 | S27 | Rebuild the full-roster activity panel, reference-space geometry and bibliographic SQLite from the S14 cohort and the reconciled S20 evidence. |
 | S28 | Construct backward-citation DAG embeddings, annual peer streams and full-dimensional research trajectories. |
+| S29 | Compare four paired trajectory signals before and after first appointment using the saved S28 tensors. |
 
-## Run S27–S28 offline
+## Run S27–S29 offline
 
 Use Python 3.11 and install the pinned requirements.
 
@@ -50,3 +51,14 @@ Output subdirectories are d0032, d0064, d0128, d0256, d0512 and d1024. Within a 
 - window_observation.csv describes coverage and the multi label for individual windows. summary.json reports teacher-weighted bootstrap summaries and counts. display_projection.npz records the fixed two-dimensional display transform. stream_display.json and annual-stream.html are aggregated views.
 
 Core edges require a strictly earlier target publication year. Outside references are terminal nodes. Propagation and stable hashing are defined in native_dag.py. Incoming citation edges stay in S13. Each dimension uses the same eligible papers and the same 64 subject groups. Annual streams are described using unique works within each field and calendar year. Portfolio transitions use complete consecutive five-year windows, keep empty windows in the observation index, and leave the focal teacher's papers out of the matched background. The four flags are descriptive diagnostics that can co-occur.
+
+## S29 first-appointment comparison from a saved stream
+
+Run the event comparison directly against the private S27 SQLite and the S28 tensor root:
+
+    python pipelines/career/appointment_dag.py /private/portfolio.sqlite /private/tensors /private/new-event-output
+    python pipelines/figures/s29.py /private/new-event-output/summary.json /private/new-event-output/figure.png
+
+First appointment comes from the database date and its recorded evidence category. The cohort retains every roster row with a supported reference link. The event year and the next two years are separate; paired post-appointment comparison starts in year +3. Each teacher uses the largest feasible equal pre/post width from 2–5 calendar years, with two consecutive blocks on each side and a common cutoff of 2025. Both calendar comparisons need two embedded papers per block and sufficient peer support to enter the common four-signal comparison. The common group is intersected across the six dimensions. The output also gives metric-specific paired counts and field-specific publication observation and censoring states.
+
+Binary changes are paired proportion differences. The 95% bounds project simultaneous exact binomial intervals for gains and losses, with Bonferroni correction. The continuous excess and 1024-dimensional publication-count diagnostic use teacher-level resampling with fixed coordinates and peer estimates. The latter thins corresponding pre/post source and target clouds to the same count using 64 within-teacher draws without replacement. The complete per-teacher CSVs remain private.

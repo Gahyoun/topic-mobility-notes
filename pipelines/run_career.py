@@ -75,7 +75,10 @@ def main():
     run('career/native_flow.py',database,tensor_directory)
     run('career/faculty_tensors.py',database,tensor_directory)
 
+    s29=out/'S29'
+    run('career/appointment_dag.py',database,tensor_directory,s29)
     if args.figures:
+        run('figures/s29.py',s29/'summary.json',s29/'figure.png',*(['--font',*args.font] if args.font else []))
         run('figures/stream.py',tensor_directory,s28/'annual-stream.html')
         run('figures/s27.py',s27/'results.json',s27/'figure.png',*(['--font',*args.font] if args.font else []))
     packages=(line.split('==',1)[0] for line in (HERE/'requirements.txt').read_text().splitlines())
