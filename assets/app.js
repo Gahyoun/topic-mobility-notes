@@ -61,7 +61,8 @@
     if (cur && nav && nav.scrollWidth > nav.clientWidth) nav.scrollLeft = cur.offsetLeft - 16;
     const example = location.hash === "#/framework/trajectory" && document.getElementById("trajectory-example");
     pendingStoryAnchor = Boolean(example);
-    if (example) example.scrollIntoView({behavior:"instant", block:"start"});
+    const stream = location.hash === "#/framework/dag-stream" && document.getElementById("dag-stream");
+    if (example || stream) (example || stream).scrollIntoView({behavior:"instant", block:"start"});
     else window.scrollTo(0, 0);
   }
 

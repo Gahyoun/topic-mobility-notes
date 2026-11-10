@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="ko">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>인용 DAG의 연도별 주제 흐름</title>
+<style>
+:root{color-scheme:light;font:15px/1.5 -apple-system,BlinkMacSystemFont,system-ui,sans-serif;color:#10243f;background:#fff}
+*{box-sizing:border-box}
+body{margin:0;padding:12px 3% 0}
+header{display:flex;align-items:end;justify-content:space-between;gap:12px;flex-wrap:wrap;padding-bottom:10px;border-bottom:1px solid #d3deed}
+h1{font-size:1.1rem;margin:0}
+.controls{display:flex;flex-wrap:wrap;gap:8px 16px}
+label{display:flex;align-items:center;gap:6px;font-size:.85rem}
+select{font:inherit;padding:.28rem .35rem;border:1px solid #b5c9e4;border-radius:.3rem;background:#f7fbff;color:inherit}
+svg{display:block;width:100%;height:315px;background:linear-gradient(135deg,#fbfdff,#edf5ff)}
+.grid{stroke:#ccd9e8;stroke-dasharray:3 5}
+.axis{font-size:12px;fill:#48647e}
+#status{margin:.45rem 0;color:#264a72;font-variant-numeric:tabular-nums}
+p{font-size:.85rem;margin:.25rem 0;color:#415978}
+@media(max-width:480px){body{padding-inline:1%}svg{height:285px}label{font-size:.78rem}.controls{gap:6px 10px}}
+</style>
+<header>
+  <h1>연도별 주제 흐름</h1>
+  <div class="controls">
+    <label>차원 <select id="dimension"></select></label>
+    <label>분야 <select id="field"></select></label>
+    <label>도착 연도 <select id="year"></select></label>
+  </div>
+</header>
+<svg id="plot" viewBox="0 0 720 330" role="img" aria-label="주제 묶음별 연간 이동 벡터">
+  <defs><marker id="tip" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+    <path d="M0 0 L8 4 L0 8 z" fill="#2363a5"/>
+  </marker></defs>
+  <g id="chart"></g>
+</svg>
+<p id="status" aria-live="polite"></p>
+<p>점은 출발 연도의 주제 중심이다. 화살표는 다음 해까지의 이동 방향과 상대적 크기를 보여준다. 두 해에 각각 논문이 20편 이상인 주제 묶음만 표시한다. 화면 좌표는 선택한 차원의 고정 2차원 투영이다.</p>
+<script id="data" type="application/json">@@STREAM@@</script>
+<script>
+const data=JSON.parse(document.getElementById('data').textContent);
+const ids=['dimension','field','year'];
+const [dimension,field,year]=ids.map(id=>document.getElementById(id));
+const labels={all:'전체',mathematics:'수학',physics:'물리',chemistry:'화학',biology:'생물'};
+function options(element,values) {
+  element.replaceChildren(...values.map(([v,label])=>new Option(label,v)));
+}
+options(dimension,Object.keys(data).map(d=>[d,d]));
+options(field,Object.entries(labels));
+dimension.value='128';
+const chart=document.getElementById('chart');
+function svg(tag,attrs,value) {
+  const node=document.createElementNS('http://www.w3.org/2000/svg',tag);
+  for (const [k,v] of Object.entries(attrs)) node.setAttribute(k,v);
+  if (value!=null) node.textContent=value;
+  return node;
+}
+function draw() {
+  const layer=data[dimension.value];
+  const dots=layer.fields[field.value][year.value]||[];
+  const [x0,x1,y0,y1]=layer.bounds;
+  const scale=Math.min(600/(x1-x0),244/(y1-y0));
+  const x=v=>360+(v-(x0+x1)/2)*scale;
+  const y=v=>153-(v-(y0+y1)/2)*scale;
+  chart.replaceChildren(
+    svg('line',{class:'grid',x1:40,x2:680,y1:y(0),y2:y(0)}),
+    svg('line',{class:'grid',x1:x(0),x2:x(0),y1:18,y2:298}),
+    svg('text',{class:'axis',x:680,y:318,'text-anchor':'end'},'투영축 1'),
+    svg('text',{class:'axis',x:40,y:21},'투영축 2')
+  );
+  for (const [a,b,u,v,n,k] of dots) {
+    const g=svg('g',{});
+    g.append(svg('title',{},'주제 묶음 '+(k+1)+' · 출발 논문 '+n.toLocaleString()+'편'));
+    if (Math.hypot(u,v)*scale>2) {
+      g.append(svg('line',{x1:x(a),y1:y(b),x2:x(a+2*u),y2:y(b+2*v),stroke:'#2363a5',
+                          'stroke-width':1.5,'marker-end':'url(#tip)',opacity:.74}));
+    }
+    g.append(svg('circle',{cx:x(a),cy:y(b),r:Math.min(6,1.8+Math.log10(n)),fill:'#163d74',opacity:.73}));
+    chart.append(g);
+  }
+  document.getElementById('status').textContent=(+year.value-1)+' → '+year.value+'년 · '+labels[field.value]+
+     ' · '+dimension.value+'차원 · 주제 묶음 '+dots.length+'개';
+}
+function selectYear() {
+  const old=year.value;
+  const years=Object.keys(data[dimension.value].fields[field.value]);
+  options(year,years.map(y=>[y,y+'년']));
+  year.value=years.includes(old)?old:years.at(-1);
+  draw();
+}
+dimension.addEventListener('change',selectYear);
+field.addEventListener('change',selectYear);
+year.addEventListener('change',draw);
+selectYear();
+</script>
+</html>
