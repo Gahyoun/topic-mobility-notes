@@ -71,6 +71,7 @@ def main():
     s28=stage('S28')
     database=s27/'portfolio.sqlite'
     tensor_directory=s28/'tensors'
+    run('career/audit_citation_cycles.py',paths['cohort'],database,s28/'cycle-audit.json')
     run('career/native_dag.py',paths['cohort'],database,s28/'dag-graph.json')
     run('career/native_flow.py',database,tensor_directory)
     run('career/faculty_tensors.py',database,tensor_directory)
