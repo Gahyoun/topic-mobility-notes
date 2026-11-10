@@ -62,3 +62,20 @@ Run the event comparison directly against the private S27 SQLite and the S28 ten
 First appointment comes from the database date and its recorded evidence category. The cohort retains every roster row with a supported reference link. The event year and the next two years are separate; paired post-appointment comparison starts in year +3. Each teacher uses the largest feasible equal pre/post width from 2–5 calendar years, with two consecutive blocks on each side and a common cutoff of 2025. Both calendar comparisons need two embedded papers per block and sufficient peer support to enter the common four-signal comparison. The common group is intersected across the six dimensions. The output also gives metric-specific paired counts and field-specific publication observation and censoring states.
 
 Binary changes are paired proportion differences. The 95% bounds project simultaneous exact binomial intervals for gains and losses, with Bonferroni correction. The continuous excess and 1024-dimensional publication-count diagnostic use teacher-level resampling with fixed coordinates and peer estimates. The latter thins corresponding pre/post source and target clouds to the same count using 64 within-teacher draws without replacement. The complete per-teacher CSVs remain private.
+
+## Largest weakly connected component
+
+Audit the archived core citation graph, the earlier-year core DAG, and the earlier-year DAG with external references as sinks. GCC membership ignores edge direction. The coordinate calculation retains citation direction, strict core year order, and external sink edges. Work-level sketching and ancestor propagation only use nodes inside a work's weak component. Restricting to the GCC therefore preserves the stored coordinates exactly. We hold the existing cluster labels fixed when comparing graph scopes.
+
+With the completed S27–S29 outputs, run these commands from the source checkout. Use a new private directory and set COHORT to the S14 SQLite, DB to the S27 SQLite, TENSORS to the S28 tensors, and EVENT to the S29 output:
+
+    mkdir "$GCC"
+    python pipelines/career/gcc_audit.py "$COHORT" "$DB" "$GCC/coverage.json" --membership "$GCC/membership.csv"
+    python pipelines/career/select_gcc.py "$DB" "$GCC/membership.csv" "$GCC/portfolio-gcc.sqlite" --event-coverage "$GCC/event-presence.json"
+    python pipelines/career/native_flow.py "$GCC/portfolio-gcc.sqlite" "$GCC/tensors"
+    python pipelines/career/faculty_tensors.py "$GCC/portfolio-gcc.sqlite" "$GCC/tensors"
+    python pipelines/career/appointment_dag.py "$GCC/portfolio-gcc.sqlite" "$GCC/tensors" "$GCC/appointment"
+    python pipelines/career/compare_gcc.py "$TENSORS" "$EVENT" "$GCC/tensors" "$GCC/appointment" "$GCC/comparison.json"
+    python pipelines/figures/stream.py "$GCC/tensors" "$GCC/annual-stream.html"
+
+The comparison verifies exact coordinate and cluster identity for the retained works in all six dimensions. The field summaries use the same faculty rows present in both scopes. The copied SQLite keeps original coverage tables and linked publications, and restricts only dag_native_coordinates. Keep the membership, row-level files and generated SQLite outside Git.
