@@ -87,3 +87,9 @@ Use the saved GCC portfolio database and the generated GCC tensor directory.
     python pipelines/career/open_followup.py "$GCC/portfolio-gcc.sqlite" "$GCC/tensors" "$GCC/open-followup"
 
 This analysis uses all observed pre-appointment years and all publication years from the year after appointment through 2025. The appointment year is recorded separately. The first two following years contribute to the post-appointment period and are also described separately. The roster retains teachers with zero observed post-appointment publications, no elapsed post-appointment publication years, and missing appointment dates. The summary provides metric-specific counts by field and available follow-up length. Convergence and divergence describe a single event-spanning transport comparison, annual parallel-topic rates use same-year papers, and branching uses an explicit citation from a novel post-appointment topic into a retained pre-appointment topic. The balanced four-window comparison remains an optional sensitivity analysis.
+
+### Reproduce the sample alluvial
+
+    python pipelines/figures/sample_alluvial.py "$DB" "$GCC/open-followup/faculty-d1024.csv" "$GCC/analysis-alluvial.html" --counts "$GCC/analysis-alluvial-counts.json"
+
+Here DB is the S27 portfolio SQLite. The chart preserves mutually exclusive coverage branches and separately counts the union and intersection of convergence/divergence, annual parallel topics, and branching availability. The HTML and optional JSON contain aggregate counts only.

@@ -62,7 +62,8 @@
     const example = location.hash === "#/framework/trajectory" && document.getElementById("trajectory-example");
     pendingStoryAnchor = Boolean(example);
     const stream = location.hash === "#/framework/dag-stream" && document.getElementById("dag-stream");
-    if (example || stream) (example || stream).scrollIntoView({behavior:"instant", block:"start"});
+    const coverage = location.hash === "#/framework/analysis-alluvial" && document.getElementById("analysis-alluvial");
+    if (example || stream || coverage) (example || stream || coverage).scrollIntoView({behavior:"instant", block:"start"});
     else window.scrollTo(0, 0);
   }
 
