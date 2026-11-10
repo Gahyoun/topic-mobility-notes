@@ -93,3 +93,9 @@ This analysis uses all observed pre-appointment years and all publication years 
     python pipelines/figures/sample_alluvial.py "$DB" "$GCC/open-followup/faculty-d1024.csv" "$GCC/analysis-alluvial.html" --counts "$GCC/analysis-alluvial-counts.json"
 
 Here DB is the S27 portfolio SQLite. The chart preserves mutually exclusive coverage branches and separately counts the union and intersection of convergence/divergence, annual parallel topics, and branching availability. The HTML and optional JSON contain aggregate counts only.
+
+### Reproduce the common-sample comparison
+
+    python pipelines/figures/sample_selection.py "$GCC/open-followup/faculty-d1024.csv" "$GCC/selection-summary.json" --figure "$GCC/topic-sample-selection.png"
+
+Both scopes use the same precomputed faculty-level estimates. The common sample requires convergence/divergence, paired annual parallel-topic rates, and branching availability. The binary contrasts use the weighted difference between the common and additional subsets, with exact binomial bounds. Annual parallel-topic contrasts use 10,000 stratified teacher bootstrap replicates that share the common-subset draws across the two scopes. The generated summary is aggregate. Use --font with local Korean fonts if the NanumHuman files are unavailable.
