@@ -79,3 +79,11 @@ With the completed S27–S29 outputs, run these commands from the source checkou
     python pipelines/figures/stream.py "$GCC/tensors" "$GCC/annual-stream.html"
 
 The comparison verifies exact coordinate and cluster identity for the retained works in all six dimensions. The field summaries use the same faculty rows present in both scopes. The copied SQLite keeps original coverage tables and linked publications, and restricts only dag_native_coordinates. Keep the membership, row-level files and generated SQLite outside Git.
+
+## First appointment without an elapsed-years threshold
+
+Use the saved GCC portfolio database and the generated GCC tensor directory.
+
+    python pipelines/career/open_followup.py "$GCC/portfolio-gcc.sqlite" "$GCC/tensors" "$GCC/open-followup"
+
+This analysis uses all observed pre-appointment years and all publication years from the year after appointment through 2025. The appointment year is recorded separately. The first two following years contribute to the post-appointment period and are also described separately. The roster retains teachers with zero observed post-appointment publications, no elapsed post-appointment publication years, and missing appointment dates. The summary provides metric-specific counts by field and available follow-up length. Convergence and divergence describe a single event-spanning transport comparison, annual parallel-topic rates use same-year papers, and branching uses an explicit citation from a novel post-appointment topic into a retained pre-appointment topic. The balanced four-window comparison remains an optional sensitivity analysis.
