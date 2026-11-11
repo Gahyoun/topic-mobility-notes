@@ -128,3 +128,13 @@ Use the corrected cohort in S27 and rerun the directed embedding before selectin
     python pipelines/figures/sample_selection.py "$GCC/open-followup/faculty-d1024.csv" "$GCC/selection-summary.json" --figure "$GCC/topic-sample-selection.png"
 
 The refit uses all observed publication years through 2025 and repeats the embedding, common clustering and peer estimates. Short follow-up and no observed publications remain observation states in the roster. Use the saved outputs at all six dimensions for dimension sensitivity and keep row-level results outside the repository.
+
+### Compare the two KOAD versions on the same faculty
+
+Use the frozen GCC open-followup output directories before and after the confirmed namesake correction.
+
+    python pipelines/career/koad_sensitivity.py "$BEFORE" "$AFTER" "$OUTPUT/koad-sensitivity.json" --figure "$OUTPUT/koad-sensitivity.png"
+
+The comparison aligns rows by faculty identifier and verifies the field, appointment anchor and observation metadata. It intersects the faculty with all four signals across both versions and all six dimensions. Each estimate averages the within-faculty corrected-minus-original difference. Annual parallel-topic rates are first differenced across appointment periods within each version.
+
+Binary intervals combine simultaneous exact binomial bounds on discordant gains and losses. Annual parallel-topic intervals use 10,000 paired faculty resamples shared across dimensions. Intervals are pointwise. The figure and JSON contain aggregates only. Use --font with a local Korean font when NanumHuman is unavailable.
