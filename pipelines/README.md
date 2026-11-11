@@ -99,3 +99,32 @@ Here DB is the S27 portfolio SQLite. The chart preserves mutually exclusive cove
     python pipelines/figures/sample_selection.py "$GCC/open-followup/faculty-d1024.csv" "$GCC/selection-summary.json" --figure "$GCC/topic-sample-selection.png"
 
 Both scopes use the same precomputed faculty-level estimates. The common sample requires convergence/divergence, paired annual parallel-topic rates, and branching availability. The binary contrasts use the weighted difference between the common and additional subsets, with exact binomial bounds. Annual parallel-topic contrasts use 10,000 stratified teacher bootstrap replicates that share the common-subset draws across the two scopes. The generated summary is aggregate. Use --font with local Korean fonts if the NanumHuman files are unavailable.
+
+## Confirmed namesake corrections and GCC refit
+
+Rebuild the KOAD decisions from the frozen augmented evidence database. The November 11 refit used [KOAD at `3e2a7d1`](https://github.com/Gahyoun/korea-openalex-disambiguation/tree/3e2a7d1930c188f854ffd7669ae0c48ee6ec7bec) and applied its high-confidence drop decisions plus documented wrong links and independently adjudicated professor–work pairs.
+
+    PYTHONPATH=/path/to/koad/src python -m koad.cli classify --db "$AUGMENTED" --output "$KOAD"
+    python pipelines/career/filter_namesakes.py "$ORIGINAL_COHORT" "$KOAD/identity_decisions.sqlite" "$REFERENCE_CACHE" "$METADATA" "$ADJUDICATIONS" "$CORRECTED_COHORT"
+
+`REFERENCE_CACHE` is the S14 reference SQLite with the frozen `work_alias` table. `METADATA` is the frozen web SQLite with the private wrong-link quarantine table. `ADJUDICATIONS` is a private JSON array with `professor_uid`, `work_id`, `decision` (`keep` or `drop`), and `evidence` for each row. Preserve dated source evidence with this input. The filter resolves aliases before matching. An explicit verified keep takes precedence. Review-only decisions and bibliographic metadata remain available for audit. A work remains in the core when another valid faculty link survives, and it can remain an external reference when cited by an eligible work. The cohort copy records changes in `namesake_filter_audit`.
+
+Use the corrected cohort in S27 and rerun the directed embedding before selecting the GCC. Use a new private output directory.
+
+    mkdir "$REFIT" "$REFIT/gcc"
+    DB="$REFIT/portfolio.sqlite"
+    GCC="$REFIT/gcc"
+    python pipelines/career/portfolio.py "$CORRECTED_COHORT" "$APPOINTMENT_EVIDENCE" "$METADATA" "$REFIT"
+    python pipelines/career/uncertainty.py "$DB" "$REFIT/results.json"
+    python pipelines/career/audit_citation_cycles.py "$CORRECTED_COHORT" "$DB" "$REFIT/cycle-audit.json"
+    python pipelines/career/native_dag.py "$CORRECTED_COHORT" "$DB" "$REFIT/dag-graph.json"
+    python pipelines/career/gcc_audit.py "$CORRECTED_COHORT" "$DB" "$GCC/coverage.json" --membership "$GCC/membership.csv"
+    python pipelines/career/select_gcc.py "$DB" "$GCC/membership.csv" "$GCC/portfolio-gcc.sqlite" --event-coverage "$GCC/event-presence.json"
+    python pipelines/career/native_flow.py "$GCC/portfolio-gcc.sqlite" "$GCC/tensors"
+    python pipelines/career/faculty_tensors.py "$GCC/portfolio-gcc.sqlite" "$GCC/tensors"
+    python pipelines/career/open_followup.py "$GCC/portfolio-gcc.sqlite" "$GCC/tensors" "$GCC/open-followup"
+    python pipelines/figures/stream.py "$GCC/tensors" "$GCC/annual-stream.html"
+    python pipelines/figures/sample_alluvial.py "$DB" "$GCC/open-followup/faculty-d1024.csv" "$GCC/analysis-alluvial.html" --counts "$GCC/alluvial-counts.json"
+    python pipelines/figures/sample_selection.py "$GCC/open-followup/faculty-d1024.csv" "$GCC/selection-summary.json" --figure "$GCC/topic-sample-selection.png"
+
+The refit uses all observed publication years through 2025 and repeats the embedding, common clustering and peer estimates. Short follow-up and no observed publications remain observation states in the roster. Use the saved outputs at all six dimensions for dimension sensitivity and keep row-level results outside the repository.
