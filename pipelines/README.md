@@ -150,3 +150,15 @@ Use the publication metadata from the two full portfolio SQLite databases, the c
 Pass `--before-full-tensors "$BEFORE_FULL_TENSORS"` if the original GCC archive stores the paper axes only. The script reconstructs those coordinates by exact work ID from the full tensor archive and verifies the cluster labels.
 
 The script checks that the publication rows differ by the adjudicated faculty–work links only. On the previously fixed common sample it compares original rates, rates after removing those links with the original embedding and clustering, and the fully refitted rates. It also intersects the two GCC paper lists, then replaces cluster membership first and coordinates second. The diagnostic terms sum to the refit contrast within each faculty row. The bootstrap uses the same 10,000 paired faculty draws across stages and dimensions. Coverage is aggregated over the entire roster from the corrected cohort database. The output includes no faculty or work IDs.
+
+### Check the annual-parallel contrast against clustering seeds
+
+Use the original full portfolio SQLite and its archived full and GCC tensors, plus the two frozen follow-up output directories used in the paired KOAD comparison.
+
+    OPENBLAS_NUM_THREADS=4 LOKY_MAX_CPU_COUNT=4 python pipelines/career/koad_seeds.py \
+      "$BEFORE_DB" "$BEFORE_FULL_TENSORS" "$BEFORE_GCC_TENSORS" "$BEFORE" "$AFTER" \
+      "$OUTPUT/koad-seeds.json" --figure "$OUTPUT/koad-seeds.png"
+
+The script reconstructs the original 64-dimensional training matrix from the original pre-GCC corpus in the saved work-ID order. It verifies the labels at seed 321110 and the before/after annual rates of the 1,899 common faculty at all six scoring dimensions. Each of the 200 alternative seeds refits the same 64-cluster MiniBatchKMeans. It applies the labels to the original GCC papers and the same faculty-year observations and uses the original within-year separation rule. The scoring implementation uses equivalent squared-distance sums and calls the original coordinate-based score near the decision boundary.
+
+Every contrast is relative to the archived original seed. The seed intervals are empirical quantiles across refits on fixed data. The exceedance count compares absolute differences and is a sensitivity diagnostic. The JSON stores the aggregate per-seed differences, seed list, and package versions without faculty or work IDs.
