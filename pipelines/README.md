@@ -138,3 +138,15 @@ Use the frozen GCC open-followup output directories before and after the confirm
 The comparison aligns rows by faculty identifier and verifies the field, appointment anchor and observation metadata. It intersects the faculty with all four signals across both versions and all six dimensions. Each estimate averages the within-faculty corrected-minus-original difference. Annual parallel-topic rates are first differenced across appointment periods within each version.
 
 Binary intervals combine simultaneous exact binomial bounds on discordant gains and losses. Annual parallel-topic intervals use 10,000 paired faculty resamples shared across dimensions. Intervals are pointwise. The figure and JSON contain aggregates only. Use --font with a local Korean font when NanumHuman is unavailable.
+
+### Attribute the annual-parallel change and audit bibliographic coverage
+
+Use the publication metadata from the two full portfolio SQLite databases, the corrected cohort with its `namesake_filter_audit` table, and the two GCC coordinate and follow-up snapshots.
+
+    python pipelines/career/koad_parallel.py "$BEFORE_DB" "$AFTER_DB" "$CORRECTED_COHORT" \
+      "$BEFORE_GCC_TENSORS" "$AFTER_GCC_TENSORS" "$BEFORE" "$AFTER" \
+      "$OUTPUT/koad-parallel.json" --figure "$OUTPUT/koad-parallel.png"
+
+Pass `--before-full-tensors "$BEFORE_FULL_TENSORS"` if the original GCC archive stores the paper axes only. The script reconstructs those coordinates by exact work ID from the full tensor archive and verifies the cluster labels.
+
+The script checks that the publication rows differ by the adjudicated faculty–work links only. On the previously fixed common sample it compares original rates, rates after removing those links with the original embedding and clustering, and the fully refitted rates. It also intersects the two GCC paper lists, then replaces cluster membership first and coordinates second. The diagnostic terms sum to the refit contrast within each faculty row. The bootstrap uses the same 10,000 paired faculty draws across stages and dimensions. Coverage is aggregated over the entire roster from the corrected cohort database. The output includes no faculty or work IDs.

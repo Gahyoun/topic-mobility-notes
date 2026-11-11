@@ -33,7 +33,7 @@ def read_result(directory, dimension):
     return frame.assign(parallel=frame.post_multi - frame.pre_multi)
 
 
-def summarize(before, after):
+def common_results(before, after):
     versions = {d: (read_result(before, d), read_result(after, d)) for d in DIMENSIONS}
     roster = versions[DIMENSIONS[0]][0][METADATA]
     eligible = []
@@ -45,7 +45,14 @@ def summarize(before, after):
     common = roster.index.intersection(eligible[0][0])
     for old, new in eligible:
         common = common.intersection(old).intersection(new)
-    common_fields = roster.loc[common, 'field']
+    availability = {d: {'before': len(a), 'after': len(b), 'paired': len(a.intersection(b))}
+                    for d, (a,b) in zip(DIMENSIONS, eligible, strict=True)}
+    return versions, roster.loc[common, 'field'], availability
+
+
+def summarize(before, after):
+    versions, common_fields, availability = common_results(before, after)
+    common = common_fields.index
     rng = np.random.default_rng(SEED)
     output = {}
     for field in FIELDS:
@@ -76,8 +83,6 @@ def summarize(before, after):
                     loss = int((delta == -1).sum())
                     result.update(gain=gain, loss=loss, delta_ci95=exact_difference(gain, loss, n))
                 results[metric] = result
-    availability = {d: {'before': len(a), 'after': len(b), 'paired': len(a.intersection(b))}
-                    for d, (a,b) in zip(DIMENSIONS, eligible, strict=True)}
     return {'fields': output, 'availability': availability}
 
 
