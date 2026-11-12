@@ -173,3 +173,15 @@ Recompute the whole-career and first-appointment summaries from the corrected S1
       --output "$OUTPUT/career-reference-comparison.png"
 
 The preliminary comparison uses the same teachers and reference coordinates to compare the complete observed post-appointment period with the period starting in the third year. The summary contains aggregate components, denominators and paired bootstrap intervals.
+
+### Reproduce the supplementary comparisons in the research notes
+
+The notes include three archived figures from the `85c77c6` site release. The figures report matched comparisons with shared-reference coordinates.
+
+| Comparison | Analysis | Figure |
+| --- | --- | --- |
+| Confirmed appointment year and first paper at the institution | [S18](upstream/S18/compare.py) | [S18 report](upstream/S18/report.py) |
+| Equal-weight two-year windows and pooled papers | [S23](career/aggregation.py) | [S23 figure](figures/s23.py) |
+| Variation within and between two-, three-, and five-year windows | [S24](career/window_width.py) | [S24 figure](figures/s24.py) |
+
+Use the archived inputs for those stages. The early bibliography counts on the data page use the S01 selection and S07 reference-coverage outputs. The citation-DAG results use the later corrected cohort and the 2025 publication cutoff.
