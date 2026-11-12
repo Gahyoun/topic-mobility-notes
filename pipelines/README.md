@@ -162,3 +162,14 @@ Use the original full portfolio SQLite and its archived full and GCC tensors, pl
 The script reconstructs the original 64-dimensional training matrix from the original pre-GCC corpus in the saved work-ID order. It verifies the labels at seed 321110 and the before/after annual rates of the 1,899 common faculty at all six scoring dimensions. Each of the 200 alternative seeds refits the same 64-cluster MiniBatchKMeans. It applies the labels to the original GCC papers and the same faculty-year observations and uses the original within-year separation rule. The scoring implementation uses equivalent squared-distance sums and calls the original coordinate-based score near the decision boundary.
 
 Every contrast is relative to the archived original seed. The seed intervals are empirical quantiles across refits on fixed data. The exceedance count compares absolute differences and is a sensitivity diagnostic. The JSON stores the aggregate per-seed differences, seed list, and package versions without faculty or work IDs.
+
+### Reproduce the reference-variation preview
+
+Recompute the whole-career and first-appointment summaries from the corrected S14 cohort and the reconciled S20 appointment evidence.
+
+    OPENBLAS_NUM_THREADS=4 LOKY_MAX_CPU_COUNT=4 python pipelines/career/career.py \
+      "$CORRECTED_COHORT" "$APPOINTMENT_EVIDENCE" "$OUTPUT/reference-career.json"
+    python pipelines/figures/s22.py --career --input "$OUTPUT/reference-career.json" \
+      --output "$OUTPUT/career-reference-comparison.png"
+
+The preliminary comparison uses the same teachers and reference coordinates to compare the complete observed post-appointment period with the period starting in the third year. The summary contains aggregate components, denominators and paired bootstrap intervals.
