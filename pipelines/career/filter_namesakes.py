@@ -8,6 +8,8 @@ import re
 import sqlite3
 from tempfile import TemporaryDirectory
 
+RELEASE_RULES = {'career_conflict', 'require_corroboration'}
+
 
 def read_only(path):
     return path.resolve().as_uri() + '?mode=ro'
@@ -52,19 +54,23 @@ def candidates(decision_db, metadata_db, adjudications, canonical):
         if row['decision'] == 'keep':
             verified.add(key)
         elif row['decision'] == 'drop' and row['evidence'].strip():
-            confirmed[key].add('verified_separate_identity')
+            reason = row.get('rule', 'verified_separate_identity')
+            if reason not in RELEASE_RULES | {'verified_separate_identity'}:
+                raise ValueError(f'Unrecognized exclusion rule: {reason!r}')
+            confirmed[key].add(reason)
         else:
             raise ValueError('Adjudications require keep or drop and a basis for each drop.')
     return {key: sorted(reasons) for key, reasons in confirmed.items() if key not in verified}
 
 
-def filter_cohort(db, decisions):
+def filter_cohort(db, decisions, include_reviewed=False):
     before = db.execute('SELECT COUNT(*) FROM faculty_publication').fetchone()[0]
     db.execute("""CREATE TABLE namesake_filter_audit (
         professor_uid TEXT,work_id TEXT,reasons_json TEXT NOT NULL,
         PRIMARY KEY(professor_uid,work_id)) WITHOUT ROWID""")
     matches = (row for row in db.execute(
-        'SELECT professor_uid,work_id FROM faculty_publication WHERE review_only=0 ORDER BY 1,2'
+        'SELECT professor_uid,work_id FROM faculty_publication WHERE review_only=0 OR ? ORDER BY 1,2',
+        (include_reviewed,),
     ) if row in decisions)
     db.executemany('INSERT INTO namesake_filter_audit VALUES (?,?,?)',
                    ((uid, work, json.dumps(decisions[uid, work])) for uid, work in matches))
@@ -106,6 +112,8 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     for name in ('cohort', 'koad_decisions', 'reference_cache', 'metadata_db', 'adjudications', 'output'):
         parser.add_argument(name, type=Path)
+    parser.add_argument('--include-reviewed', action='store_true',
+                        help='Also remove matched exclusions from the review-only records.')
     args = parser.parse_args()
     if args.output.exists():
         parser.error('Choose a new private output SQLite file.')
@@ -117,7 +125,7 @@ def main():
                 closing(sqlite3.connect(pending)) as target:
             original.backup(target)
             with target:
-                summary = filter_cohort(target, decisions)
+                summary = filter_cohort(target, decisions, args.include_reviewed)
             assert target.execute('PRAGMA quick_check').fetchone()[0] == 'ok'
         args.output.hardlink_to(pending)
     print(json.dumps(summary, sort_keys=True), flush=True)

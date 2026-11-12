@@ -185,3 +185,24 @@ The notes include three archived figures from the `85c77c6` site release. The fi
 | Variation within and between two-, three-, and five-year windows | [S24](career/window_width.py) | [S24 figure](figures/s24.py) |
 
 Use the archived inputs for those stages. The early bibliography counts on the data page use the S01 selection and S07 reference-coverage outputs. The citation-DAG results use the later corrected cohort and the 2025 publication cutoff.
+
+## Apply the November 11 KOAD release rules and recompute stream tensors
+
+Use [KOAD `62e6b00`](https://github.com/Gahyoun/korea-openalex-disambiguation/tree/62e6b006b085056dafd8b2668949a6c28e0ab72f) for the deterministic first pass. Its release-level career-conflict and corroboration decisions are available as encrypted evidence in the [dashboard release `efad892`](https://github.com/Gahyoun/professor-research-career-dashboard/tree/efad892/data/private_encrypted). Apply the exact recorded exclusions to the analysis cohort. The public release and the analysis cohort have different work eligibility rules.
+
+    umask 077
+    PYTHONPATH=/path/to/koad/src python -m koad.cli classify --db "$AUGMENTED" --output "$KOAD"
+    python pipelines/career/release_adjudications.py "$ORIGINAL_COHORT" "$ANON_SALT" \
+      "$PRIOR_ADJUDICATIONS" "$CONFLICT_RELEASE" "$CORROBORATION_RELEASE" "$ADJUDICATIONS"
+    python pipelines/career/filter_namesakes.py "$ORIGINAL_COHORT" "$KOAD/identity_decisions.sqlite" \
+      "$REFERENCE_CACHE" "$METADATA" "$ADJUDICATIONS" "$CORRECTED_COHORT" --include-reviewed
+
+The merger prompts for the dashboard release password and maps anonymous IDs with the frozen dashboard salt. Its output and the exclusion audit remain private. Manual keeps take precedence. Matched exclusions are removed from the supported and review-only tiers. Reference lists remain available for the papers that cite those works and for any surviving valid faculty link. Run the GCC refit above with this cohort, then run:
+
+    python pipelines/career/stream_tensor.py "$GCC/portfolio-gcc.sqlite" "$GCC/tensors" "$GCC/stream-tensor"
+    python pipelines/figures/flow_covariance.py "$GCC/stream-tensor/summary.json" \
+      "$GCC/flow-covariance.png" --font /path/to/korean-font.ttf
+
+The appointment comparison leaves the event year separate and uses every observed year on either side. Within- and between-topic scatter use the same sample covariance denominator, so their normalized differences sum to the flow-adjusted excess spread on every row. The shape diagnostic compares trace-normalized covariance matrices using the Frobenius distance, evaluated through covariance factors. Its finite-sample distribution depends on the number of papers. The field reference translates prior topics using peer centroid shifts; it does not yet model peer covariance deformation.
+
+The separate whole-career branch check uses consecutive complete five-year triples with at least two positioned papers per block. It requires a parent topic in all three blocks, a child absent from the earlier positioned history, separation in both later blocks, and an observed backward citation from the middle child to the first parent. Results distinguish adequate observation, persistent separation, and citation support. These are diagnostic counts from a strict screen. Keep the private row-level files outside Git.
