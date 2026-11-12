@@ -61,9 +61,7 @@
     if (cur && nav && nav.scrollWidth > nav.clientWidth) nav.scrollLeft = cur.offsetLeft - 16;
     const example = location.hash === "#/framework/trajectory" && document.getElementById("trajectory-example");
     pendingStoryAnchor = Boolean(example);
-    const stream = location.hash === "#/framework/dag-stream" && document.getElementById("dag-stream");
-    const coverage = location.hash === "#/framework/analysis-alluvial" && document.getElementById("analysis-alluvial");
-    if (example || stream || coverage) (example || stream || coverage).scrollIntoView({behavior:"instant", block:"start"});
+    if (example) example.scrollIntoView({behavior:"instant", block:"start"});
     else window.scrollTo(0, 0);
   }
 
