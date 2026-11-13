@@ -992,146 +992,43 @@ main:focus-visible {
   margin-top: 32px;
 }
 
-.stream-example {
-  --stream-a: var(--diagram-blue);
-  --stream-b: var(--diagram-slate-ink);
-  --stream-joint: var(--accent-strong);
-  --stream-event: var(--diagram-slate);
-  max-width: 740px;
-  border-block: 1px solid var(--rule);
-  padding-block: 18px;
-  scroll-margin-block-start: calc(var(--header-height) + 16px);
+.tensor-figure {
+  max-width: 760px;
 }
 
-.stream-example figcaption {
-  margin: 0 0 12px;
-  padding: 0;
-  border: 0;
-  font-size: 1.125rem;
-}
-
-.methodology .stream-example-key,
-.methodology .stream-example-stages {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-}
-
-.stream-example-key {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 4px 16px;
+.tensor-stages {
   color: var(--muted);
-  font-size: 0.875rem;
-}
-
-.stream-example-key li {
-  display: inline-flex;
-  align-items: center;
-  gap: 7px;
-}
-
-.stream-example-symbol {
-  inline-size: 10px;
-  block-size: 10px;
-  flex: none;
-  border: 2px solid currentColor;
-}
-
-.stream-example .line-a { color: var(--stream-a); }
-.stream-example .line-b { color: var(--stream-b); }
-.stream-example .joint { color: var(--stream-joint); }
-
-.stream-example-symbol.line-a {
-  border-radius: 50%;
-  background: currentColor;
-}
-
-.stream-example-symbol.joint {
-  background: currentColor;
-  transform: rotate(45deg) scale(0.85);
-}
-
-.methodology .stream-example-stages {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  margin-block: 16px 10px;
-  border-block: 1px solid var(--rule);
-  color: var(--muted);
-  font-size: 0.875rem;
   font-weight: 650;
-  text-align: center;
 }
 
-.stream-example-stages li { padding: 5px 2px; }
-.stream-example-stages li:last-child {
-  background: var(--accent-soft);
+.tensor-stages span:last-child {
   color: var(--accent-strong);
 }
 
-.stream-example-case h4 {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  gap: 0 10px;
-  margin: 0 0 4px;
-  color: var(--ink);
-  font-size: 1rem;
-}
-
-.stream-example-case h4 span {
-  color: var(--muted);
-  font-size: 0.875rem;
-  font-weight: 500;
-}
-
-.stream-example-case svg { width: 100%; }
-.stream-example-case + .stream-example-case {
-  margin-block-start: 12px;
-  padding-block-start: 12px;
+.tensor-trajectory + .tensor-trajectory {
+  padding-block-start: 10px;
   border-block-start: 1px solid var(--rule-soft);
 }
 
-.stream-example .stream-example-case p,
-.stream-example .stream-example-note {
-  margin: 5px 0 0;
+.tensor-trajectory p,
+.tensor-figure .tensor-note {
+  margin-block: 4px 0;
   color: var(--muted);
   font-size: 0.875rem;
 }
 
-.stream-example .stream-example-note { margin-block-start: 12px; }
-.stream-example-after { fill: var(--accent-soft); }
-
-.stream-example-event,
-.stream-example-track,
-.stream-example-paper {
-  vector-effect: non-scaling-stroke;
-  fill: none;
-  stroke: currentColor;
+.tensor-figure .tensor-note {
+  margin-block-start: 12px;
 }
 
-.stream-example-event {
-  color: var(--stream-event);
-  stroke-dasharray: 2 4;
-  stroke-width: 1;
+.tensor-figure:focus-visible,
+#literature-genealogy:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 4px;
 }
 
-.stream-example-track { stroke-width: 2; }
-.stream-example-track.line-b { stroke-dasharray: 6 4; }
-.stream-example-paper { stroke-width: 1.5; fill: currentColor; }
-.stream-example-paper.line-b { fill: var(--bg); }
-
-@media (forced-colors: active) {
-  .stream-example {
-    --stream-a: CanvasText;
-    --stream-b: CanvasText;
-    --stream-joint: CanvasText;
-    --stream-event: GrayText;
-  }
-
-  .stream-example-case svg { forced-color-adjust: none; }
-  .stream-example-after, .stream-example-paper.line-b { fill: Canvas; }
-  .stream-example-symbol { forced-color-adjust: none; }
+#literature-genealogy {
+  scroll-margin-block-start: calc(var(--header-height) + 16px);
 }
 
 @media (width < 1024px) {
