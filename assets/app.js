@@ -5,7 +5,22 @@
   const KEY = "topic-notes-key";
   const b64 = (s) => Uint8Array.from(atob(s), (c) => c.charCodeAt(0));
   const enc = new TextEncoder();
+  const app = document.getElementById("app");
+  const desktop = window.matchMedia("(min-width: 1024px)");
+  const noteLabels = {
+    index: "연구 개요",
+    framework: "모형과 측정량",
+    q0: "경력 전이와 포트폴리오 분산",
+    h2: "공변 좌표계와 중심 이동",
+    h12: "분야별 궤적",
+    integration: "논문 내·논문 간 분산",
+    measurement: "측정 오차와 강건성",
+    data: "데이터 구조와 표본",
+    hypotheses: "가설 검정과 판정 기준",
+  };
+  const navigationGroups = ["모형과 가설", "관측과 분해", "데이터와 검증"];
   let site = null;
+  let currentSlug = null;
   let storyOffset = null;
   let storyFrameRequest = 0;
   let pendingStoryAnchor = false;
@@ -49,23 +64,228 @@
     return JSON.parse(new TextDecoder().decode(pt));
   }
 
-  function route() {
-    if (!site) return;
-    const slug = (location.hash.match(/^#\/([\w-]+)/) || [])[1] || "index";
-    const p = site.pages[slug] || site.pages.index;
-    storyOffset = null;
-    document.getElementById("app").innerHTML = p.html;
-    document.title = p.title + " · Research notes";
-    const cur = document.querySelector('nav.side a[aria-current="page"]');
-    const nav = document.querySelector("nav.side");
-    if (cur && nav && nav.scrollWidth > nav.clientWidth) nav.scrollLeft = cur.offsetLeft - 16;
-    const example = location.hash === "#/framework/trajectory" && document.getElementById("trajectory-example");
-    const flowAnchor = location.hash === "#/framework/faculty-flow" && document.getElementById("faculty-flow");
-    pendingStoryAnchor = Boolean(example);
-    if (example) example.scrollIntoView({behavior:"instant", block:"start"});
-    else if (flowAnchor) flowAnchor.scrollIntoView({behavior:"instant", block:"start"});
-    else window.scrollTo(0, 0);
+  function element(tag, className, text) {
+    const node = document.createElement(tag);
+    if (className) node.className = className;
+    if (text) node.textContent = text;
+    return node;
   }
+
+  function arrangeNavigation() {
+    const header = app.querySelector(".top-in");
+    const actions = element("div", "page-actions");
+    const metadata = header.querySelector(".meta");
+    if (metadata) {
+      actions.append(metadata);
+      app.querySelector("footer .top-in")?.append(element("span", "meta mobile-page-meta", metadata.textContent));
+    }
+    const lock = element("button", "page-lock", "잠그기");
+    lock.type = "button";
+    lock.addEventListener("click", () => {
+      try { sessionStorage.removeItem(KEY); } catch (_) {}
+      location.reload();
+    });
+    actions.append(lock);
+    header.append(actions);
+
+    const nav = app.querySelector("nav.side");
+    nav.setAttribute("aria-label", "노트 목록");
+    nav.querySelectorAll("h2").forEach((heading, index) => {
+      if (navigationGroups[index]) heading.textContent = navigationGroups[index];
+    });
+    const pager = app.querySelector(".pager");
+    pager?.setAttribute("aria-label", "이전 및 다음 노트");
+    for (const link of app.querySelectorAll(".side a, .pager a")) {
+      const label = noteLabels[link.hash.slice(2)];
+      if (!label) continue;
+      const direction = link.querySelector("small");
+      link.replaceChildren(...(direction ? [direction, label] : [label]));
+    }
+    const disclosure = element("details", "mobile-notes");
+    disclosure.open = desktop.matches;
+    nav.before(disclosure);
+    disclosure.append(element("summary", "", "노트 목록"), nav);
+
+    const skip = element("a", "skip", "본문 바로가기");
+    skip.href = "#main";
+    app.prepend(skip);
+  }
+
+  function literatureCell(source, label) {
+    const group = element("div");
+    const value = element("dd");
+    group.append(element("dt", "", label), value);
+    if (source.classList.contains("sch-gen-ours")) {
+      value.append(...source.childNodes);
+      return group;
+    }
+    const list = element("ul");
+    let item = element("li");
+    for (const node of [...source.childNodes]) {
+      if (node.nodeName === "BR") {
+        if (item.textContent.trim()) list.append(item);
+        item = element("li");
+      } else {
+        if (!item.hasChildNodes() && node.nodeType === Node.TEXT_NODE) {
+          node.textContent = node.textContent.replace(/^\s*·\s*/, "");
+        }
+        item.append(node);
+      }
+    }
+    if (item.textContent.trim()) list.append(item);
+    value.append(list);
+    return group;
+  }
+
+  function arrangeSchematics(main) {
+    const labels = ["선행 연구", "핵심 문헌", "최근 후속 연구", "본 연구의 기여"];
+    for (const head of main.querySelectorAll(".sch-genealogy-row:has(> .sch-genealogy-head)")) {
+      const schematic = head.parentElement;
+      const list = element("ol", "literature-list");
+      const rows = schematic.querySelectorAll(":scope > .sch-genealogy-row:has(> .sch-gen-stream)");
+      for (const row of rows) {
+        const [stream, ...cells] = row.children;
+        const item = element("li", "literature-stream");
+        const heading = element("h3");
+        heading.append(...stream.childNodes);
+        if (heading.firstChild?.nodeType === Node.TEXT_NODE) {
+          heading.firstChild.textContent = heading.firstChild.textContent.replace(/^\s*\d+[.)]\s*/, "");
+        }
+        heading.querySelectorAll("br").forEach((lineBreak) => lineBreak.replaceWith(" "));
+        const groups = element("dl");
+        cells.forEach((cell, index) => groups.append(literatureCell(cell, labels[index])));
+        item.append(heading, groups);
+        list.append(item);
+        row.remove();
+      }
+      head.replaceWith(list);
+    }
+
+    for (const schematic of main.querySelectorAll(".sch-wrap")) {
+      const kicker = schematic.querySelector(":scope > .sch-head .sch-kicker")?.textContent || "";
+      if (kicker.includes("CURRENT-ARCHIVE EMPIRICAL EXECUTION BLUEPRINT")) {
+        schematic.classList.add("execution-blueprint");
+        const inputs = schematic.querySelector(":scope > .sch-grid-4");
+        const branches = schematic.querySelector(":scope > .sch-grid-3");
+        inputs?.before(element("h3", "architecture-stage", "검증에 쓰는 자료"));
+        branches?.before(element("h3", "architecture-stage", "가설별 검증 경로"));
+      }
+      if (kicker.includes("DUAL CAREER TRANSITIONS")) schematic.classList.add("career-transition");
+      if (kicker.includes("COMOVING OPTIMAL TRANSPORT")) {
+        schematic.classList.add("reading-architecture", "spectrum-architecture");
+        addArchitectureLabels(schematic, ["변위 추정", "스펙트럼 판별"]);
+      }
+      if (kicker.includes("INSTITUTIONAL HIERARCHY (H3)")) {
+        schematic.classList.add("reading-architecture", "pathways-architecture");
+        addArchitectureLabels(schematic, ["기관 위계와 선발", "공저와 신규 주제"]);
+      }
+    }
+    window.arrangeComparisonArchitectures(main);
+  }
+
+  function addArchitectureLabels(schematic, labels) {
+    const grid = schematic.querySelector(":scope > .sch-grid-2");
+    if (!grid || grid.children.length !== labels.length) return;
+    [...grid.children].forEach((lane, index) => {
+      lane.prepend(element("div", "architecture-lane-label", labels[index]));
+    });
+  }
+
+  function addOutline(main, slug) {
+    const flow = main.querySelector(".methodology") || main;
+    const headings = [...flow.querySelectorAll(":scope > h2, :scope > h3, :scope > section > h2, :scope > section > h3")];
+    const sections = headings.filter((heading) => heading.tagName === "H2");
+    if (sections.length < 3) return;
+
+    function outlineLink(heading, id) {
+      const target = heading.id ? heading : heading.tagName === "H2" ? heading.closest("section[id]") || heading : heading;
+      target.id ||= id;
+      const label = (heading.querySelector(".katex-html") ? heading.innerText : heading.textContent).trim();
+      const link = element("a", "", label);
+      link.href = `#/${slug}/${target.id}`;
+      return link;
+    }
+
+    const list = element("ul", "outline-tree");
+    sections.forEach((heading, index) => {
+      const start = headings.indexOf(heading);
+      const end = index + 1 < sections.length ? headings.indexOf(sections[index + 1]) : headings.length;
+      const children = headings.slice(start + 1, end);
+      const item = element("li");
+      const link = outlineLink(heading, `section-${index + 1}`);
+      item.append(link);
+      if (children.length) {
+        const nested = element("ul");
+        children.forEach((child, childIndex) => {
+          const subitem = element("li");
+          subitem.append(outlineLink(child, `section-${index + 1}-${childIndex + 1}`));
+          nested.append(subitem);
+        });
+        item.append(nested);
+      }
+      list.append(item);
+    });
+    const outline = element("details", "note-outline");
+    const outlineNav = element("nav");
+    outlineNav.setAttribute("aria-label", "이 페이지의 목차");
+    outlineNav.append(list);
+    outline.append(element("summary", "", "이 페이지의 목차"), outlineNav);
+    if (slug === "index" || slug === "framework") outline.open = desktop.matches;
+    (sections[0].closest("section") || sections[0]).before(outline);
+    if (slug === "index" || slug === "framework") main.classList.add("hierarchical-note");
+  }
+
+  function route(focus = false) {
+    if (!site) return;
+    const [, requested, anchor] = location.hash.match(/^#\/([\w-]+)(?:\/([\w-]+))?$/) || [];
+    const slug = requested && Object.hasOwn(site.pages, requested) ? requested : "index";
+    if (slug !== currentSlug) {
+      const page = site.pages[slug];
+      storyOffset = null;
+      app.innerHTML = page.html;
+      document.title = page.title + " · 연구 노트";
+      const main = app.querySelector("main");
+      main.tabIndex = -1;
+      arrangeNavigation();
+      for (const lineBreak of main.querySelectorAll("p.lede > br, p.intro > br")) lineBreak.replaceWith(" ");
+      arrangeSchematics(main);
+      addOutline(main, slug);
+      currentSlug = slug;
+    }
+
+    const main = app.querySelector("main");
+    const anchorId = anchor === "trajectory" ? "trajectory-example" : anchor;
+    const target = anchorId && document.getElementById(anchorId);
+    pendingStoryAnchor = Boolean(target && anchor === "trajectory" && storyOffset === null);
+    if (target && main.contains(target)) {
+      if (focus && target.tabIndex < 0) target.tabIndex = -1;
+      if (focus) target.focus({preventScroll: true});
+      target.scrollIntoView({behavior:"instant", block:"start"});
+      reportStoryScroll();
+    } else {
+      if (focus) main.focus({preventScroll: true});
+      window.scrollTo(0, 0);
+    }
+  }
+
+  desktop.addEventListener("change", () => {
+    const disclosure = app.querySelector(".mobile-notes");
+    if (disclosure) disclosure.open = desktop.matches;
+  });
+
+  app.addEventListener("click", (event) => {
+    if (event.target.closest("a.skip")) {
+      event.preventDefault();
+      const main = app.querySelector("main");
+      main.focus();
+      main.scrollIntoView({block: "start"});
+      return;
+    }
+    const link = event.target.closest(".side a");
+    if (!link || event.defaultPrevented || event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) return;
+    if (!desktop.matches) link.closest(".mobile-notes").open = false;
+    if (link.hash === location.hash) route(true);
+  });
 
   window.addEventListener("message", (event) => {
     if (event.origin !== "null") return;
@@ -96,44 +316,60 @@
     }
   });
 
-  async function unlockWith(key, blob) {
-    site = await open(key, blob);
-    window.addEventListener("hashchange", route);
-    route();
+  function showSite(unlocked, focus = false) {
+    site = unlocked;
+    route(focus);
+    window.addEventListener("hashchange", () => route(true));
   }
 
   async function start() {
-    let blob;
-    try { blob = await loadBlob(); } catch (e) { return; }
-    try {
-      const raw = sessionStorage.getItem(KEY);
-      if (raw) {
-        const key = await crypto.subtle.importKey("raw", b64(raw), "AES-GCM", true, ["decrypt"]);
-        await unlockWith(key, blob);
-        return;
-      }
-    } catch (e) { try { sessionStorage.removeItem(KEY); } catch (_) {} }
-
     const form = document.getElementById("unlock");
     const input = document.getElementById("pw");
     const err = document.getElementById("err");
     const btn = form.querySelector("button");
-    input.focus();
-    form.addEventListener("submit", async (ev) => {
-      ev.preventDefault();
-      err.textContent = ""; btn.disabled = true; btn.textContent = "…";
+    const pending = loadBlob().catch(() => null);
+    let manuallyUnlocking = false;
+
+    form.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      manuallyUnlocking = true;
+      err.textContent = "";
+      input.removeAttribute("aria-invalid");
+      btn.disabled = true;
+      btn.textContent = "노트 여는 중…";
       try {
+        const blob = await pending || await loadBlob();
         const key = await derive(input.value, blob);
-        await unlockWith(key, blob);
+        showSite(await open(key, blob), true);
         try {
           const raw = new Uint8Array(await crypto.subtle.exportKey("raw", key));
           sessionStorage.setItem(KEY, btoa(String.fromCharCode(...raw)));
         } catch (_) {}
-      } catch (e) {
-        err.textContent = "비밀번호가 맞지 않습니다.";
-        btn.disabled = false; btn.textContent = "열기"; input.select();
+      } catch (error) {
+        if (error.name === "OperationError") {
+          err.textContent = "비밀번호를 다시 확인하세요.";
+          input.setAttribute("aria-invalid", "true");
+          input.select();
+        } else {
+          err.textContent = "연구 노트를 불러오지 못했습니다. 잠시 후 다시 시도하세요.";
+        }
+        btn.disabled = false;
+        btn.textContent = "노트 열기";
       }
     });
+
+    const blob = await pending;
+    if (manuallyUnlocking || !blob) return;
+    try {
+      const raw = sessionStorage.getItem(KEY);
+      if (raw) {
+        const key = await crypto.subtle.importKey("raw", b64(raw), "AES-GCM", true, ["decrypt"]);
+        const cachedSite = await open(key, blob);
+        if (!manuallyUnlocking) showSite(cachedSite);
+      }
+    } catch (_) {
+      try { sessionStorage.removeItem(KEY); } catch (_) {}
+    }
   }
 
   start();
