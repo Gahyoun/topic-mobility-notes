@@ -10,7 +10,7 @@
   const noteLabels = {
     index: "연구 개요",
     framework: "시계열 임베딩과 모형",
-    q0: "경력별 평균 제곱 쌍거리",
+    q0: "Mean squared pairwise distance",
     h2: "Comoving frame과 중심 변위",
     h12: "분야별 초과 퍼짐",
     integration: "논문 내·논문 간 공분산",
