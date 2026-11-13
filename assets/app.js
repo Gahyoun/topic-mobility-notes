@@ -60,13 +60,24 @@
     const nav = document.querySelector("nav.side");
     if (cur && nav && nav.scrollWidth > nav.clientWidth) nav.scrollLeft = cur.offsetLeft - 16;
     const example = location.hash === "#/framework/trajectory" && document.getElementById("trajectory-example");
+    const flowAnchor = location.hash === "#/framework/faculty-flow" && document.getElementById("faculty-flow");
     pendingStoryAnchor = Boolean(example);
     if (example) example.scrollIntoView({behavior:"instant", block:"start"});
+    else if (flowAnchor) flowAnchor.scrollIntoView({behavior:"instant", block:"start"});
     else window.scrollTo(0, 0);
   }
 
   window.addEventListener("message", (event) => {
-    if (event.origin !== "null" || event.data?.type !== "topic-trajectory-height") return;
+    if (event.origin !== "null") return;
+    if (event.data?.type === "topic-faculty-flow-height") {
+      const flowFrame = document.querySelector(".faculty-flow-embed");
+      const h = event.data.height;
+      if (flowFrame?.contentWindow === event.source && Number.isInteger(h) && h >= 280 && h <= 2400) {
+        flowFrame.style.height = h + "px";
+      }
+      return;
+    }
+    if (event.data?.type !== "topic-trajectory-height") return;
     const frame = document.querySelector(".trajectory-embed");
     const height = event.data.height;
     if (frame?.contentWindow === event.source && Number.isInteger(height) && height >= 320 && height <= 4000) {
