@@ -14,18 +14,23 @@ from threadpoolctl import threadpool_limits
 from analyze import FIELDS, METRICS, BOOTSTRAPS
 
 
+def reference_components(ix, moments, centers, center_squared):
+    x = centers[ix]
+    mu = x.mean(axis=0)
+    w = float((moments[ix] - center_squared[ix]).mean())
+    b = float(np.square(x - mu).sum(axis=1).mean())
+    t = float(moments[ix].mean() - mu @ mu)
+    assert abs(w + b - t) < 1e-9
+    return w, b, t
+
+
 def measure(rows, key, moments, centers, center_squared):
     out = []
     for label, group in rows.groupby(key, sort=True, observed=True):
         if len(group) < 2:
             continue
         ix = group.ix.to_numpy()
-        x = centers[ix]
-        mu = x.mean(axis=0)
-        w = float((moments[ix] - center_squared[ix]).mean())
-        b = float(np.square(x - mu).sum(axis=1).mean())
-        t = float(moments[ix].mean() - mu @ mu)
-        assert abs(w + b - t) < 1e-9
+        w, b, t = reference_components(ix, moments, centers, center_squared)
         if t > 1e-10:
             if len(key) == 1:
                 label = (label,)
@@ -107,7 +112,7 @@ def summarize(complete, refs, stages, years, modes, event, activity, full, rng):
     return field_summary, stage_summary, event_summary
 
 
-def main(argv=None, collect=None, collect_roster=None):
+def main(argv=None, collect=None, collect_roster=None, *, collect_phases=None, cutoff=2025):
     parser = argparse.ArgumentParser(description=__doc__)
     for name in ('cohort', 'appointment', 'out'):
         parser.add_argument(name, type=Path)
@@ -119,13 +124,14 @@ def main(argv=None, collect=None, collect_roster=None):
                                       FROM roster_coverage ORDER BY uid''', db)
         linked = pd.read_sql_query('''SELECT f.professor_uid uid, f.work_id work, f.year, r.subject field, f.topic_id, f.work_type
                 FROM faculty_publication f JOIN roster_coverage r USING (professor_uid)
-                WHERE f.review_only=0 AND f.year<=2025 ORDER BY uid, f.year, work''', db)
+                WHERE f.review_only=0 AND f.year<=? ORDER BY uid, f.year, work''', db,
+                                  params=(cutoff,))
         raw_refs = pd.read_sql_query('''SELECT CAST(substr(o.work_id,2) AS INTEGER) AS citing,
                  CAST(substr(o.reference_id,2) AS INTEGER) AS cited
                  FROM outgoing_reference o WHERE o.work_id<>o.reference_id AND EXISTS (
                      SELECT 1 FROM faculty_publication f WHERE f.work_id=o.work_id
-                     AND f.review_only=0 AND f.year<=2025)
-                 ORDER BY o.work_id, o.reference_id''', db)
+                     AND f.review_only=0 AND f.year<=?)
+                 ORDER BY o.work_id, o.reference_id''', db, params=(cutoff,))
     refs = roster[roster.n_supported_refs > 0]
     assert len(roster) == 3937 and len(refs) == 3446 and set(linked.field).issubset(FIELDS)
     assert raw_refs.gt(0).all().all()
@@ -159,25 +165,18 @@ def main(argv=None, collect=None, collect_roster=None):
     papers['n_positioned_refs'] = counts[papers.ix.to_numpy()]
     assert set(papers.uid).issubset(refs.uid)
     assert n_refs.shape == counts.shape and np.all(counts <= n_refs)
-    start = linked.groupby('uid').year.min()
-    assert (papers.year >= papers.uid.map(start)).all()
-    papers['stage'] = pd.cut(papers.year - papers.uid.map(start), [-1, 4, 9, 19, np.inf],
-                             labels=['0–4', '5–9', '10–19', '20+'])
-    full = measure(papers, ['uid', 'field'], moments, centers, center_squared)
-    stages = measure(papers, ['uid', 'field', 'stage'], moments, centers, center_squared)
-    print('Represented full careers:', len(full), flush=True)
-
     stored = pd.DataFrame(json.loads(args.appointment.read_text()))
     modes = ['official', 'baseline', 'database', 'proxy']
     cols = ['uid', 'field', 'anchor', 'basis']
     audited = stored.loc[~stored.shared_author_id.astype(bool)].rename(columns={'year': 'anchor'})
     dates = {mode: audited.loc[audited['mode'].eq(mode), cols].copy()
              for mode in ('official', 'baseline')}
-    unassigned = refs.loc[~refs.uid.isin(dates['baseline'].uid)
-                          & ~refs.shared_author_id.astype(bool)
-                          & ~refs.conflicting_years.astype(bool)].copy()
+    anchor_roster = roster if collect_phases is not None else refs
+    unassigned = anchor_roster.loc[~anchor_roster.uid.isin(dates['baseline'].uid)
+                                   & ~anchor_roster.shared_author_id.astype(bool)
+                                   & ~anchor_roster.conflicting_years.astype(bool)].copy()
     def date_ok(year):
-        return year.notna() & year.le(2025) & (
+        return year.notna() & year.le(cutoff) & (
             unassigned.first_ranked_roster_year.isna() | year.le(unassigned.first_ranked_roster_year))
     first_role = date_ok(unassigned.reconstructed_year)
     unassigned['anchor'] = unassigned.reconstructed_year.where(
@@ -188,6 +187,18 @@ def main(argv=None, collect=None, collect_roster=None):
     proxy_only = audited.loc[audited['mode'].eq('proxy') & audited.basis.eq('first_affiliated_paper')
                              & ~audited.uid.isin(dates['database'].uid), cols]
     dates['proxy'] = pd.concat([dates['database'], proxy_only], ignore_index=True).sort_values('uid')
+    if collect_phases is not None:
+        collect_phases(roster, linked, papers, centers, moments, center_squared, dates)
+        return
+
+    start = linked.groupby('uid').year.min()
+    assert (papers.year >= papers.uid.map(start)).all()
+    papers['stage'] = pd.cut(papers.year - papers.uid.map(start), [-1, 4, 9, 19, np.inf],
+                             labels=['0–4', '5–9', '10–19', '20+'])
+    full = measure(papers, ['uid', 'field'], moments, centers, center_squared)
+    stages = measure(papers, ['uid', 'field', 'stage'], moments, centers, center_squared)
+    print('Represented full careers:', len(full), flush=True)
+
     if collect_roster is not None:
         collect_roster(args.cohort, roster, linked, papers, centers, dates['database'])
         return

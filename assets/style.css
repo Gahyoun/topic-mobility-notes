@@ -1210,12 +1210,12 @@ main:focus-visible {
   --sch-teal: var(--diagram-slate);
   --sch-teal-bg: var(--diagram-slate-soft);
   --sch-teal-ink: var(--diagram-slate-ink);
-  --sch-purple: var(--diagram-gold);
-  --sch-purple-bg: var(--diagram-gold-soft);
-  --sch-purple-ink: var(--diagram-gold);
-  --sch-amber: var(--diagram-gold);
-  --sch-amber-bg: var(--diagram-gold-soft);
-  --sch-amber-ink: var(--diagram-gold);
+  --sch-purple: var(--diagram-slate-ink);
+  --sch-purple-bg: var(--diagram-slate-soft);
+  --sch-purple-ink: var(--diagram-slate-ink);
+  --sch-amber: var(--accent-strong);
+  --sch-amber-bg: var(--accent-soft);
+  --sch-amber-ink: var(--accent-strong);
   --sch-crimson: var(--career-dashed, var(--bad));
   --sch-crimson-ink: var(--career-dashed, var(--bad));
 }
@@ -1538,7 +1538,7 @@ main:focus-visible {
 
 /* Solid GNU Blue and dashed GNU Gold distinguish the two series. */
 .career-transition {
-  --career-dashed: var(--diagram-gold);
+  --career-dashed: var(--diagram-slate-ink);
 }
 
 .career-chart-scroll {
@@ -1556,6 +1556,88 @@ main:focus-visible {
 
 .career-chart-scroll + .sch-row-between {
   font-size: 0.875rem;
+}
+
+.slope-schematic {
+  margin-inline: 0;
+}
+
+.slope-chart .sch-svg {
+  min-width: 400px;
+}
+
+.slope-hypotheses {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px 24px;
+  margin: 8px 0 16px;
+}
+
+.slope-hypotheses > div {
+  border-top: 1px solid var(--sch-rule);
+  padding-block: 8px;
+}
+
+.slope-hypotheses dt {
+  color: var(--sch-blue-ink);
+  font-weight: 700;
+}
+
+.slope-hypotheses > div + div dt {
+  color: var(--sch-teal-ink);
+}
+
+.slope-hypotheses dd {
+  margin: 4px 0 0;
+}
+
+.pilot-scope {
+  margin-block: 24px;
+  border-block: 1px solid var(--rule-soft);
+  padding-block: 16px 8px;
+}
+
+.pilot-scope h3 {
+  margin-top: 0;
+}
+
+.stream-design {
+  margin-inline: 0;
+}
+
+.stream-design-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px 32px;
+}
+
+.stream-design-grid > section {
+  margin: 0;
+}
+
+.stream-design-grid h4 {
+  color: var(--sch-blue-ink);
+  margin: 0 0 8px;
+}
+
+.stream-design-grid > section + section h4 {
+  color: var(--sch-teal-ink);
+}
+
+.stream-sequence {
+  margin: 0 0 16px;
+  padding-inline-start: 24px;
+}
+
+.stream-sequence li + li {
+  margin-top: 6px;
+}
+
+@media (max-width: 600px) {
+  .slope-hypotheses,
+  .stream-design-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
 }
 
 .execution-blueprint > .sch-grid-4 {

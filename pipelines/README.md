@@ -174,6 +174,16 @@ Recompute the whole-career and first-appointment summaries from the corrected S1
 
 The preliminary comparison uses the same teachers and reference coordinates to compare the complete observed post-appointment period with the period starting in the third year. The summary contains aggregate components, denominators and paired bootstrap intervals.
 
+### Describe appointment phases with separate coverage and paired samples
+
+    python pipelines/career/appointment_phases.py \
+      "$CORRECTED_COHORT" "$APPOINTMENT_EVIDENCE" "$OUTPUT/appointment-phases.json" \
+      --anchor database --cutoff 2025
+
+This analysis reports the observed pre-appointment period, the two calendar years before appointment, the appointment year plus the next year (`r = 0, 1`), the following two years (`r = 2, 3`), and the observed period from `r = 2` to the cutoff. Publication years in the initial phase can include work undertaken before appointment. The S20 data do not establish when research was performed or identify verified postdoc spells and affiliation moves. An analysis of those events requires separately verified dates and, for repeated events, distinct event identifiers.
+
+Descriptive phase summaries keep faculty with the data available in that phase, including recent hires with partial calendar exposure. The cutoff defaults to the publication year recorded in the cohort provenance. Coverage distinguishes those who have yet to reach a phase, those with no linked papers, and those whose linked papers do not support reference geometry. Bounded phases also report separate complete-window summaries. Matched differences use complete two-year windows in both phases and separate counts for each outcome. The aggregation pools eligible papers inside a faculty-phase and weights faculty equally. One positioned paper contributes to `W` and `T`; its zero `B/T` is recorded for descriptive summaries only when `T > 0`. The paired `B` and `B/T` comparisons require at least two positioned papers on both sides. Outputs contain aggregate summaries only.
+
 ### Reproduce the supplementary comparisons in the research notes
 
 The notes include three archived figures from the `85c77c6` site release. The figures report matched comparisons with shared-reference coordinates.
