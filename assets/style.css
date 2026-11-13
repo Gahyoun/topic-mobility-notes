@@ -618,20 +618,35 @@ tr.link:hover td {
   margin: 16px 0 24px;
   padding-block: 12px;
   border-block: 1px solid var(--rule-soft);
-  overflow-x: auto;
+  overflow: auto hidden;
 }
 
 .math.block .katex-display {
-  width: max-content;
-  min-width: 100%;
   margin: 0;
 }
 
+.math.block .katex-display > .katex {
+  white-space: normal;
+}
+
+.math.block .katex-display .katex-base {
+  margin-block: 0.15em;
+}
+
 .math.inline {
+  vertical-align: baseline;
+}
+
+.math.inline.is-wide {
   display: inline-block;
   max-width: 100%;
-  overflow-x: auto;
-  vertical-align: middle;
+  overflow: auto hidden;
+}
+
+.math.inline.is-wide:focus-visible,
+.math.block[tabindex]:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
 }
 
 .katex {
@@ -1201,8 +1216,8 @@ main:focus-visible {
   --sch-amber: var(--diagram-gold);
   --sch-amber-bg: var(--diagram-gold-soft);
   --sch-amber-ink: var(--diagram-gold);
-  --sch-crimson: var(--bad);
-  --sch-crimson-ink: var(--bad);
+  --sch-crimson: var(--career-dashed, var(--bad));
+  --sch-crimson-ink: var(--career-dashed, var(--bad));
 }
 
 .reading-architecture > .sch-grid-2 {
@@ -1519,6 +1534,28 @@ main:focus-visible {
 .career-transition .sch-pill-box {
   padding: 0;
   border: 0;
+}
+
+/* Solid GNU Blue and dashed GNU Gold distinguish the two series. */
+.career-transition {
+  --career-dashed: var(--diagram-gold);
+}
+
+.career-chart-scroll {
+  overflow: auto hidden;
+}
+
+.career-chart-scroll .sch-svg {
+  min-width: 640px;
+}
+
+.career-chart-scroll:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+
+.career-chart-scroll + .sch-row-between {
+  font-size: 0.875rem;
 }
 
 .execution-blueprint > .sch-grid-4 {

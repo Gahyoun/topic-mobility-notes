@@ -11,10 +11,10 @@
     index: "연구 개요",
     framework: "모형과 측정량",
     q0: "경력 전이와 포트폴리오 분산",
-    h2: "공변 좌표계와 중심 이동",
+    h2: "Comoving frame과 중심 이동",
     h12: "분야별 궤적",
     integration: "논문 내·논문 간 분산",
-    measurement: "측정 오차와 강건성",
+    measurement: "측정 오차와 robustness",
     data: "데이터 구조와 표본",
     hypotheses: "가설 검정과 판정 기준",
   };
@@ -24,6 +24,44 @@
   let storyOffset = null;
   let storyFrameRequest = 0;
   let pendingStoryAnchor = false;
+  let mathLayoutFrame = 0;
+
+  function updateMathLayout() {
+    mathLayoutFrame = 0;
+    const main = app.querySelector("main#main");
+    if (!main) return;
+    const inlineMath = [...main.querySelectorAll(".math.inline")];
+    const widths = new Map();
+    const wide = inlineMath.map((formula) => {
+      let container = formula.parentElement;
+      while (container !== main && getComputedStyle(container).display === "inline") {
+        container = container.parentElement;
+      }
+      if (!widths.has(container)) {
+        const style = getComputedStyle(container);
+        widths.set(container, container.clientWidth - parseFloat(style.paddingLeft) - parseFloat(style.paddingRight));
+      }
+      const available = widths.get(container);
+      const segments = formula.querySelectorAll(".katex-html > :is(.katex-base, .base)");
+      return available > 0 && [...segments].some((segment) => segment.getBoundingClientRect().width > available + 1);
+    });
+    inlineMath.forEach((formula, index) => formula.classList.toggle("is-wide", wide[index]));
+    for (const formula of main.querySelectorAll(".math.block, .math.inline.is-wide")) {
+      if (formula.scrollWidth > formula.clientWidth + 1) formula.tabIndex = 0;
+      else formula.removeAttribute("tabindex");
+    }
+    for (const formula of main.querySelectorAll(".math.inline:not(.is-wide)[tabindex]")) {
+      formula.removeAttribute("tabindex");
+    }
+    for (const chart of main.querySelectorAll(".career-chart-scroll")) {
+      if (chart.scrollWidth > chart.clientWidth + 1) chart.tabIndex = 0;
+      else chart.removeAttribute("tabindex");
+    }
+  }
+
+  function scheduleMathLayout() {
+    if (!mathLayoutFrame) mathLayoutFrame = requestAnimationFrame(updateMathLayout);
+  }
 
   function reportStoryScroll() {
     if (storyOffset === null || storyFrameRequest) return;
@@ -41,6 +79,8 @@
 
   window.addEventListener("scroll", reportStoryScroll, {passive:true});
   window.addEventListener("resize", reportStoryScroll);
+  window.addEventListener("resize", scheduleMathLayout);
+  document.fonts.addEventListener("loadingdone", scheduleMathLayout);
 
   async function loadBlob() {
     const r = await fetch("data/site.json", { cache: "no-store" });
@@ -170,7 +210,19 @@
         inputs?.before(element("h3", "architecture-stage", "검증에 쓰는 자료"));
         branches?.before(element("h3", "architecture-stage", "가설별 검증 경로"));
       }
-      if (kicker.includes("DUAL CAREER TRANSITIONS")) schematic.classList.add("career-transition");
+      if (kicker.includes("DUAL CAREER TRANSITIONS")) {
+        schematic.classList.add("career-transition");
+        const chart = schematic.querySelector("svg.sch-svg");
+        if (chart) {
+          const plot = element("div", "career-chart-scroll");
+          plot.setAttribute("role", "region");
+          plot.setAttribute("aria-label", "경력 단계별 궤적 그래프");
+          const legend = chart.nextElementSibling;
+          if (legend?.classList.contains("sch-row-between")) legend.style.removeProperty("font-size");
+          chart.replaceWith(plot);
+          plot.append(chart);
+        }
+      }
       if (kicker.includes("COMOVING OPTIMAL TRANSPORT")) {
         schematic.classList.add("reading-architecture", "spectrum-architecture");
         addArchitectureLabels(schematic, ["변위 추정", "스펙트럼 판별"]);
@@ -250,6 +302,7 @@
       for (const lineBreak of main.querySelectorAll("p.lede > br, p.intro > br")) lineBreak.replaceWith(" ");
       arrangeSchematics(main);
       addOutline(main, slug);
+      updateMathLayout();
       currentSlug = slug;
     }
 
