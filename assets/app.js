@@ -46,7 +46,14 @@
       return available > 0 && [...segments].some((segment) => segment.getBoundingClientRect().width > available + 1);
     });
     inlineMath.forEach((formula, index) => formula.classList.toggle("is-wide", wide[index]));
-    for (const formula of main.querySelectorAll(".math.block, .math.inline.is-wide")) {
+    const blocks = [...main.querySelectorAll(".math.block")];
+    for (const block of blocks) block.style.removeProperty("--math-scale");
+    const scales = blocks.map((block) => block.scrollWidth > block.clientWidth + 1
+      ? (block.clientWidth - 2) / block.scrollWidth : 1);
+    blocks.forEach((block, index) => {
+      if (scales[index] >= 0.9 && scales[index] < 1) block.style.setProperty("--math-scale", scales[index]);
+    });
+    for (const formula of [...blocks, ...main.querySelectorAll(".math.inline.is-wide")]) {
       if (formula.scrollWidth > formula.clientWidth + 1) formula.tabIndex = 0;
       else formula.removeAttribute("tabindex");
     }
@@ -81,6 +88,9 @@
   window.addEventListener("resize", reportStoryScroll);
   window.addEventListener("resize", scheduleMathLayout);
   document.fonts.addEventListener("loadingdone", scheduleMathLayout);
+  app.addEventListener("toggle", (event) => {
+    if (event.target.matches("#main details") && event.target.querySelector(".math")) scheduleMathLayout();
+  }, true);
 
   async function loadBlob() {
     const r = await fetch("data/site.json", { cache: "no-store" });

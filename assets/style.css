@@ -626,7 +626,16 @@ tr.link:hover td {
 }
 
 .math.block .katex-display > .katex {
+  display: table;
+  min-inline-size: 100%;
+  inline-size: max-content;
+  font-size: calc(1.08em * var(--math-scale, 1));
   white-space: normal;
+}
+
+.math.block + .math.block {
+  margin-block-start: -24px;
+  border-block-start: 0;
 }
 
 .math.block .katex-display .katex-base {
