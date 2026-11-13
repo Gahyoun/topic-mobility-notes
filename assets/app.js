@@ -9,14 +9,14 @@
   const desktop = window.matchMedia("(min-width: 1024px)");
   const noteLabels = {
     index: "연구 개요",
-    framework: "모형과 측정량",
-    q0: "경력 전이와 포트폴리오 분산",
-    h2: "Comoving frame과 중심 이동",
-    h12: "분야별 궤적",
-    integration: "논문 내·논문 간 분산",
-    measurement: "측정 오차와 robustness",
-    data: "데이터 구조와 표본",
-    hypotheses: "가설 검정과 판정 기준",
+    framework: "시계열 임베딩과 모형",
+    q0: "경력별 평균 제곱 쌍거리",
+    h2: "Comoving frame과 중심 변위",
+    h12: "분야별 초과 퍼짐",
+    integration: "논문 내·논문 간 공분산",
+    measurement: "임베딩 타당도와 robustness",
+    data: "관측 모집단과 분석 표본",
+    hypotheses: "가설·추정량·판정 기준",
   };
   const navigationGroups = ["모형과 가설", "관측과 분해", "데이터와 검증"];
   let site = null;
