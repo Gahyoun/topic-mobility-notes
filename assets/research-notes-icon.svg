@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
+  <!-- iOS 18 Figma template, node 2102:860. Center 512, outer diameter 890, inner diameter 538. -->
+  <style>
+    .tile { fill: #ffffff; }
+    .mark { fill: #ffffff; }
+    .branch { stroke: #ffffff; }
+    .core-start { stop-color: #2f6feb; }
+    .core-end { stop-color: #5a4bc6; }
+    @media (prefers-color-scheme: dark) {
+      .tile { fill: #10182a; }
+      .mark { fill: #10182a; }
+      .branch { stroke: #10182a; }
+      .core-start { stop-color: #8fb9ff; }
+      .core-end { stop-color: #b7aaff; }
+    }
+  </style>
+  <defs>
+    <linearGradient id="ring" x1="0" y1="0" x2="1" y2="1" gradientUnits="objectBoundingBox">
+      <stop stop-color="#58b6fc"/>
+      <stop offset=".5" stop-color="#4a8ef6"/>
+      <stop offset="1" stop-color="#5a4bc6"/>
+    </linearGradient>
+    <linearGradient id="core" x1="0" y1="0" x2="1" y2="1" gradientUnits="objectBoundingBox">
+      <stop class="core-start"/>
+      <stop class="core-end" offset="1"/>
+    </linearGradient>
+  </defs>
+  <rect class="tile" width="1024" height="1024" rx="228"/>
+  <circle cx="512" cy="512" r="431.5" fill="none" stroke="url(#ring)" stroke-width="27"/>
+  <circle cx="512" cy="512" r="269" fill="url(#core)"/>
+  <path class="branch" d="M346 512H490C561 512 581 410 656 410M490 512C561 512 581 614 656 614"
+        fill="none" stroke-width="55" stroke-linecap="round"/>
+  <g class="mark">
+    <circle cx="346" cy="512" r="49"/>
+    <circle cx="656" cy="410" r="49"/>
+    <circle cx="656" cy="614" r="49"/>
+  </g>
+</svg>

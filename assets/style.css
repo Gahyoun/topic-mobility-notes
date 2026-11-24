@@ -132,11 +132,21 @@ a:hover {
 }
 
 .brand {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
   color: var(--ink);
   font-size: 1.25rem;
   font-weight: 700;
   line-height: 1.5;
   text-decoration: none;
+}
+
+.brand::before {
+  content: "";
+  flex: 0 0 24px;
+  height: 24px;
+  background: url("research-notes-icon.svg") center / contain no-repeat;
 }
 
 .brand span,
