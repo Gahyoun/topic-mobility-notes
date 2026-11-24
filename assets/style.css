@@ -281,6 +281,29 @@ h1 {
   margin: 20px 0 26px;
 }
 
+.citation-scope-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 17rem), 1fr));
+  gap: 1rem 1.5rem;
+  margin: 0 0 1rem;
+}
+
+.citation-scope-grid > div {
+  border-top: 2px solid var(--accent);
+  padding-top: .65rem;
+}
+
+.citation-scope-grid h3,
+.citation-scope-grid p {
+  margin: 0 0 .35rem;
+}
+
+.scope-context,
+.status-note {
+  color: var(--muted);
+  font-size: .9375rem;
+}
+
 #career-cases + ol h3 small {
   color: var(--muted);
   font-size: .86em;

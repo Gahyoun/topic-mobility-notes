@@ -1,13 +1,60 @@
 # Topic mobility research pipeline
 
-Publication cutoff is 2025-12-31. The source includes the analysis procedures. The frozen source databases, adjudication evidence, paper vectors and researcher-level outputs are stored separately in the private research workspace.
+The archived runs below use a publication cutoff of 2025-12-31. The frozen source databases, adjudication evidence, paper vectors and researcher-level outputs are stored separately in the private research workspace.
 
-## Stage map
+## Current citation scope and verification
+
+Let B denote eligible faculty-authored focal papers and A denote the observed papers
+that directly cite B. In conventional citation direction, A → B means that A cites B.
+The current design uses the observed one-hop A → B edges. It does not expand
+references from A to construct additional neighbors or return paths. The node sets,
+deduplication, identity exclusions, publication cutoff and citation observation
+period must be reported with any resulting count.
+
+The working B count reported by the researcher is 167,756. It has not been independently
+recounted against the private research database after all exclusions in the current
+review. Existing subpage values retain their recorded release, cohort and metric
+definitions until the corresponding private inputs and outputs are reconciled.
+The archived analyses below describe the calculations that produced earlier
+outputs. Their outgoing-reference and propagated-ancestor coordinates use a
+different graph construction from the current direct-citer design.
+
+### Evidence available from the public dashboard release
+
+On 2026-11-24, the public SQLite at dashboard release
+[`efad892`](https://github.com/Gahyoun/professor-research-career-dashboard/tree/efad8927f44dbb6e92c7b361f6e515e1ba228ad2)
+was inspected through a read-only connection. The downloaded bytes match Git blob
+`17f49122a04381db51f96bd173f87babf0cfada5`; the SQLite quick check returned
+`ok` and its foreign-key check returned zero violations.
+
+| Directly checked public quantity | Count and scope |
+| --- | --- |
+| Roster rows | 3,937, comprising mathematics 648, physics 846, chemistry 912 and biology 1,531 |
+| Researchers with a positive public lead-paper count | 3,512 |
+| Researchers with a recorded appointment year | 3,616 |
+| Public faculty–lead-paper counts through 2026 | 113,992, summed over researchers |
+| Public faculty–lead-paper counts through 2025 | 111,279, summed from annual output |
+
+Public lead papers require first-author or corresponding-author status and the
+release's positive identity gate. Shared papers can contribute to more than one
+researcher's count. These totals therefore have their own eligibility and counting
+unit. The public database contains aggregate `professors`, `career_segments`,
+`yearly_lead_output`, `professor_journal_output` and `release_metadata` tables,
+plus a dashboard join view. It contains no work-level authorship or incoming/
+outgoing citation-edge table from which to recount B or the A → B network.
+
+The public journal-output sum is 114,016, exceeding the professor and annual-output
+sums by 24 counts across 18 researchers. This discrepancy remains in that release.
+The public SQLite's aggregate structure cannot identify the contributing works.
+Use the directly checked roster and annual-output totals with their stated scope
+when comparing the site against this release.
+
+## Archived stage map
 
 | Stage | Inputs and operation |
 | --- | --- |
 | S01–S12 | Apply the frozen authorship decisions, build the reference cache and original classification/shared-reference comparisons. See [the original stage instructions](analysis/README.md). These scripts also reproduce legacy summaries. |
-| S13 | Use the frozen OpenAlex snapshot/cache to assemble the three-year incoming-citation archive, check authorship and construct A–B–A citation paths. The API scripts describe their inputs with --help. Live API queries can return different records and are unnecessary for S27–S28. |
+| S13 | Reproduce the archived three-year incoming-citation comparisons and the old A–B–A return-path analysis from the frozen OpenAlex snapshot/cache. These return paths are retained for historical reproducibility. The current direct A → faculty B design does not use them. Historical A/B labels must be interpreted within that script's definitions. API scripts describe their inputs with --help. Live API queries can return different records and are unnecessary for S27–S28. |
 | S14 | Rebuild the 2025 roster and outgoing citation database from the work, identity and reference snapshots. Run from the research workspace. TOPIC_MOBILITY_OFFICIAL_DATES points to a private JSON array of [roster spelling, latest institution, doctoral year, appointment year, evidence URL, evidence note] records. |
 | S15–S20 | Reconcile appointment evidence, proxy dates and publication follow-up. The original scripts under upstream/ retain their frozen workspace layout. Their queue, decision and evidence files are required private inputs. Run the scripts in the numbered order after restoring the original per-stage directories and files. |
 | S21 | Compare citation reference components with paired appointment windows. |
@@ -16,7 +63,7 @@ Publication cutoff is 2025-12-31. The source includes the analysis procedures. T
 | S28 | Construct backward-citation DAG embeddings, annual peer streams and full-dimensional research trajectories. |
 | S29 | Compare four paired trajectory signals before and after first appointment using the saved S28 tensors. |
 
-## Run S27–S29 offline
+## Reproduce archived S27–S29 offline
 
 Use Python 3.11 and install the pinned requirements.
 
