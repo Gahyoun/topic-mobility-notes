@@ -263,7 +263,9 @@
       const target = heading.id ? heading : heading.tagName === "H2" ? heading.closest("section[id]") || heading : heading;
       target.id ||= id;
       const label = (heading.querySelector(".katex-html") ? heading.innerText : heading.textContent).trim();
-      const link = element("a", "", label);
+      const number = heading.querySelector(":scope > .n")?.textContent.trim();
+      const link = element("a", "", number ? label.slice(number.length).trimStart() : label);
+      if (number) link.prepend(element("span", "outline-number", number), " ");
       link.href = `#/${slug}/${target.id}`;
       return link;
     }
